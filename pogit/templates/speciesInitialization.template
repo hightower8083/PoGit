@@ -43,7 +43,7 @@ namespace particles
      */
     using InitPipeline = bmpl::vector<
 
-${CreateDensityOrManipulator}
+${CreateManipulate}
 
     >;
 

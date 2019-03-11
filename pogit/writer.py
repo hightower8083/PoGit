@@ -65,8 +65,9 @@ def WriteSimulationFiles( objs ):
                 templateAppendableArgs[arg] )
 
         for arg in templateCommaAppendableArgs.keys():
-            templateCommaAppendableArgs[arg] = ',\n'.join( \
-                templateCommaAppendableArgs[arg] )
+            if len(templateCommaAppendableArgs[arg])>0:
+                templateCommaAppendableArgs[arg] = ',\n'.join( \
+                    templateCommaAppendableArgs[arg] )
 
         templateArgs = { **templateMainArgs,
                          **templateAppendableArgs,
