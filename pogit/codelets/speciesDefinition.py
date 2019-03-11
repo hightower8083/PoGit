@@ -17,7 +17,7 @@ using ParticleFlags${name} = MakeSeq_t<
     ionizers<
         MakeSeq_t<
             particles::ionization::BSIEffectiveZ< PIC_${TargetSpeciesName} >,
-            particles::ionization::ADKCircPol< PIC_${TargetSpeciesName} >
+            particles::ionization::ADK${pol}Pol< PIC_${TargetSpeciesName} >
         >
     >,
     ionizationEnergies< ionization::energies::AU::${Element}_t >,
@@ -28,7 +28,7 @@ using ParticleFlags${name} = MakeSeq_t<
 using PIC_${name} = Particles<
     PMACC_CSTRING( "${name}" ),
     ParticleFlags${name},
-    DefaultParticleAttributes
+    IonParticleAttributes
 >;"""
 
 speciesDefinition['electron'] = \

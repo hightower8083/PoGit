@@ -53,6 +53,11 @@ using DefaultParticleAttributes = MakeSeq_t<
     weighting
 >;
 
+using IonParticleAttributes = MakeSeq_t<
+    DefaultParticleAttributes,
+    boundElectrons
+>;
+
 /*########################### end particle attributes ########################*/
 
 /*########################### define species #################################*/

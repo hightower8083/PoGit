@@ -27,12 +27,27 @@ StartPosition["Ordered"] = \
     using startPosition${name} = QuietImpl< QuietParam${name} >;"""
 
 ## particle manipulators codelets
-Manipulator = {}
+Manipulators = {}
 
-Manipulator['Temperature'] = \
+Manipulators['Temperature'] = \
 """
     struct TemperatureParam${name}
     {
         static constexpr float_64 temperature = ${Temperature};
     };
     using AddTemperature${name} = unary::Temperature< TemperatureParam${name} >;"""
+
+Manipulators['SetIonCharge'] = \
+"""
+    struct SetIonChargeImpl${name}
+    {
+        template< typename T_Particle >
+        DINLINE void operator()(
+            T_Particle& particle
+        )
+        {
+            constexpr float_X protonNumber = GetAtomicNumbers< T_Particle >::type::numberOfProtons;
+            particle[ boundElectrons_ ] = protonNumber - ${InitialCharge}._X;
+        }
+    };
+    using SetIonCharge${name} = generic::Free< SetIonChargeImpl${name} >;"""

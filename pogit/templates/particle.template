@@ -64,7 +64,7 @@ ${StartPosition}
 namespace manipulators
 {
 
-${Manipulator}
+${Manipulators}
 
 } // namespace manipulators
 
