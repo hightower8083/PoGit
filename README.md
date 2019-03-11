@@ -20,7 +20,7 @@ python setup.py install
 ## Using
 
 To get an idea of how it works clone some PIConGPU example, remove all `param` filed, and then create and execute a PoGit script in the simulation folder:
-```
+```bash
 pic-create $PIC_EXAMPLES/LaserWakefield pogit-test-run
 cd pogit-test-run
 rm -r include/picongpu/param/* .build/
