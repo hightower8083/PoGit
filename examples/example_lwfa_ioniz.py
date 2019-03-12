@@ -25,10 +25,8 @@ mpi_decomp = (1, 2, 1)
 ctau = 4e-6                 # Laser duration in meters
 a0 = 3.0                    # Laser normalized amplitude
 waist = 5.0e-6              # Laser waist in meters
-y0 = -2.5 * ctau            # Initial position of laser centroid
-y_antenna = 3e-6            # Position of antenna in meters
-i_center = (Nx//2, Nz//2)   # Transverse position of antenna in cells
-laser_profile = 'GaussianCIRCULAR'
+cdelay = -3 * ctau          # Delay of laser centroid in meters
+iy_antenna = 72             # Position of antenna # (8 cells from absorber)
 
 ## Plasma parameters
 # Base density
@@ -52,8 +50,8 @@ gridSolver = GridSolver( xmax, ymax, zmax, Nx, Ny, Nz, Nsteps,
                          type=solver_type, J_smoothing=J_smoothing,
                          movingWindow=True, movePoint=1.)
 
-laser = Laser( a0=a0, ctau=ctau, waist=waist, y_antenna=y_antenna,
-               y0=y0, profile=laser_profile, i_center=i_center, dim=dim )
+laser = Laser( a0=a0, ctau=ctau, waist=waist, iy_antenna=iy_antenna,
+               cdelay=cdelay)
 
 eons = Particle( name='Electrons', type='electron',
                  initial_positions=initial_positions, pusher=pusher,
@@ -64,7 +62,7 @@ ions = Particle( name='Ions', type='generic_ionizable',
                  density_profile=density_profile, base_density=ne,
                  element='Nitrogen', initial_charge=5,
                  mass_ratio=1836.152672*14.007, charge_ratio=-7,
-                 target_species=eons, ionizer_polarization='Circ',
+                 target_species=eons, ionizer_polarization='Lin',
                  initial_positions=initial_positions,
                  pusher=pusher, shape_order=shape_order,
                  current_deposition=current_deposition,
