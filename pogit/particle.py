@@ -27,7 +27,7 @@ class Particle:
                   base_density=None, relative_density=1.0,
                   element='Hydrogen', initial_charge=0,
                   mass_ratio=1836.152672, charge_ratio=-1,
-                  target_species=None, ionizer_polarisation='Circ',
+                  target_species=None, ionizer_polarization='Circ',
                   initial_temperature=None,
                   shape_order=1, pusher='Boris',
                   current_deposition='Esirkepov' ):
@@ -148,7 +148,7 @@ class Particle:
             params["Element"] = element
             params["TargetSpeciesName"] = target_species.name
             params["InitialCharge"] = initial_charge
-            params["pol"] = laser_polarisation
+            params["pol"] = ionizer_polarization
             params["MassRatio"] = mass_ratio
             params["ChargeRatio"] = charge_ratio
 
