@@ -44,7 +44,7 @@ class Laser:
             Position of the antenna center on the grid in cells (ix, iz)
 
         profile: string
-            Name of the profile defined in `fieldBackground.template`
+            Name of the profile defined in `codelets/fieldBackground.py`
 
         pol: char
             Laser polarization `x` or `z`

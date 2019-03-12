@@ -74,4 +74,4 @@ This and more detailed examples can be found in this repository.
 
 ## Contributing
 
-Everybody interested is greatly welcome to contribute. If this one is to become a good API, there is a huge work work to be done (manipulators, filters, diagnoctics etc).
+Everybody interested is greatly welcome to contribute. If this one is to become a good API, there is a huge work to be done (manipulators, filters, diagnoctics etc).
