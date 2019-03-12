@@ -8,7 +8,7 @@ from pogit.writer import WriteSimulationFiles
 dim = '3d'
 
 # Solver choice and features
-solver_type = 'Yee'
+solver_type = 'Lehe'
 J_smoothing = 'Binomial'
 
 # Sizes of the simulation box and grid
@@ -32,7 +32,7 @@ laser_profile = 'GaussianCIRCULAR'
 
 ## Plasma parameters
 # Base density
-ne = 8e18 * 1e6
+ne = 1e18 * 1e6
 
 # Density profile defined in `codelets/density.py`
 density_profile = { 'type': 'Gaussian', 'vacuumCellsY': 100,
@@ -57,13 +57,18 @@ laser = Laser( a0=a0, ctau=ctau, waist=waist, y_antenna=y_antenna,
 
 eons = Particle( name='Electrons', type='electron',
                  initial_positions=initial_positions, pusher=pusher,
-                 current_deposition=current_deposition, )
-
-ions = Particle( name='Hydrogen', type='generic_ionizable', pusher=pusher,
-                 density_profile=density_profile, base_density=ne,
-                 target_species=eons, initial_positions=initial_positions,
                  current_deposition=current_deposition,
-                 typicalNppc=initial_positions[1] )
+                 shape_order=shape_order)
+
+ions = Particle( name='Ions', type='generic_ionizable',
+                 density_profile=density_profile, base_density=ne,
+                 element='Nitrogen', initial_charge=5,
+                 mass_ratio=1836.152672*14.007, charge_ratio=-7,
+                 target_species=eons, ionizer_polarization='Circ',
+                 initial_positions=initial_positions,
+                 pusher=pusher, shape_order=shape_order,
+                 current_deposition=current_deposition,
+                 typicalNppc = initial_positions[1]*3 )
 # Note: only one species can define `base_density` and `typicalNppc`
 
 WriteSimulationFiles( ( eons, ions, gridSolver, laser ) )
