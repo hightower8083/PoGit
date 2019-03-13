@@ -13,11 +13,17 @@ class GridSolver:
             include/picongpu/param/dimension.param
             include/picongpu/param/fieldSolver.param
             etc/picongpu/run.cfg
+    Notes
+    -----
+        When movingWindow is active in PIConGPU a hidden layer of GPUs is
+        used, which reduces the simulation domain y-size. Here it is taken
+        into account in a way, that user always defines the actual domain
+        of interest, and extra-grid is added implicitly
     """
     def __init__( self, xmax, ymax, zmax, Nx, Ny, Nz,
-                  Nsteps, decomposition = (1,2,1),
+                  Nsteps, N_diag, decomposition = (1, 2, 1),
                   dim='3d', dt_fromCFL=0.995, dt=None, absorber=None,
-                  type='Yee', J_smoothing=None,
+                  solver_scheme='Yee', J_smoothing=None,
                   movingWindow=False, movePoint=1.0
                 ):
         """
@@ -31,7 +37,11 @@ class GridSolver:
             Numbers of gridpoints in x, y and z directions
 
         Nsteps : int
-            Number of simu;ation steps to perform
+            Number of simulation steps to perform
+
+        N_diag : int
+            Number of simulation steps between writing the
+            HDF5 diagnostics
 
         decomposition: tuple (three int)
             Number of devices used in x, y and z directions
@@ -50,7 +60,7 @@ class GridSolver:
         absorber : dict
             Dictionary defining the absorber (see below for details)
 
-        type : string
+        solver_scheme : string
             Solver to be used. Can be:
                 "Yee": (default)
                 "Lehe": (anti-NCI scheme)
@@ -82,24 +92,42 @@ class GridSolver:
 
         if dim=='3d':
             SuperCell = (8, 8, 4)
-        else:
+        elif dim=='2d':
             SuperCell = (16, 16, 1)
 
         Nx = np.ceil( 1.*Nx / decomposition[0] / SuperCell[0] ) * \
                               decomposition[0] * SuperCell[0]
-        Ny = np.ceil( 1.*Ny / decomposition[1] / SuperCell[1] ) * \
-                              decomposition[1] * SuperCell[1]
         Nz = np.ceil( 1.*Nz / decomposition[2] / SuperCell[2] ) * \
                               decomposition[2] * SuperCell[2]
-
         dx = xmax/Nx
-        dy = ymax/Ny
         dz = zmax/Nz
+
+
+        if movingWindow:
+            params['movingWindow'] =  "-m"
+            # Account for extra GPU(s) at the front
+            nGPUy = decomposition[1]
+            if nGPUy <= 1:
+                raise ValueError("Add extra GPU along Y for movingWindow")
+            Ny_loc = Ny/(nGPUy-1.)
+            Ly_loc = ymax/(nGPUy-1.)
+            Ny_loc = np.int(np.ceil(Ny_loc/SuperCell[1]) * SuperCell[1])
+            dy = Ly_loc/Ny_loc
+            Ny = Ny_loc * nGPUy
+            ymax = Ly_loc * nGPUy
+        else:
+            params['movingWindow'] =  ""
+            Ny = np.ceil( 1.*Ny / decomposition[1] / SuperCell[1] ) * \
+                                  decomposition[1] * SuperCell[1]
+            dy = ymax/Ny
+
+        params['movePoint'] = movePoint
 
         params['Nx'] = np.int(Nx)
         params['Ny'] = np.int(Ny)
         params['Nz'] = np.int(Nz)
         params['Nsteps'] = Nsteps
+        params['N_diag'] = N_diag
         params['CELL_WIDTH_SI'] = dx
         params['CELL_HEIGHT_SI'] = dy
         params['CELL_DEPTH_SI'] = dz
@@ -124,13 +152,6 @@ class GridSolver:
         else:
             params['absorber'] = absorber
 
-        if movingWindow:
-            params['movingWindow'] =  "-m"
-        else:
-            params['movingWindow'] =  ""
-
-        params['movePoint'] = movePoint
-
         for i_comp, comp in enumerate(('x', 'y', 'z')):
             for i_lim, lim in enumerate(('min', 'max')):
 
@@ -140,11 +161,19 @@ class GridSolver:
                 params[ f'ABSORBER_STRENGTH_{comp}{lim}' ] = \
                     params['absorber']["Strength"][i_comp][i_lim]
 
-        params['Solver'] = type
+        params['Solver'] = solver_scheme
         if J_smoothing is None:
             params['CurrentInterpolation'] = 'None'
         else:
             params['CurrentInterpolation'] = J_smoothing
+
+        # Converting float and integer arguments to strings
+        for arg in params.keys():
+            if type(params[arg]) == float:
+                # Imposing a fixed float format
+                params[arg] = f"{params[arg]:.15e}"
+            if type(params[arg]) == int:
+                params[arg] = f"{params[arg]:d}"
 
         # Grid template
         template_grid = {}

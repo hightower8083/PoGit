@@ -1,6 +1,7 @@
 from mako.template import Template
 import numpy as np
-from scipy.constants import c
+from scipy.constants import c, atomic_mass, m_e, m_p
+from mendeleev import element as table_element
 
 from .codelets.particle import StartPosition, Manipulators
 from .codelets.speciesDefinition import speciesDefinition
@@ -21,12 +22,11 @@ class Particle:
         include/picongpu/param/speciesInitialization.param
         include/picongpu/param/density.param
     """
-    def __init__( self, name, type,
-                  initial_positions=('Random', 3),
+    def __init__( self, name, species, initial_positions=None,
                   typicalNppc=None, density_profile=None,
                   base_density=None, relative_density=1.0,
-                  element='Hydrogen', initial_charge=0,
-                  mass_ratio=1836.152672, charge_ratio=-1,
+                  element=None, initial_charge=0,
+                  mass_ratio=m_p/m_e, charge_ratio=-1,
                   target_species=None, ionizer_polarization='Circ',
                   initial_temperature=None,
                   shape_order=1, pusher='Boris',
@@ -39,11 +39,18 @@ class Particle:
         name : string
             Name of the particle species
 
-        type : string
+        species : string
             Type of the species. Presently supported types:
-                'electron'
-                'proton'
-                'generic_ionizable'
+                'electron' : simple electron
+                'proton' : simple proton
+                'ion' : ion from periodic table (needs `element` argument)
+                'generic_ionizable' : ion from periodic table with custom
+                                      `mass_ratio` and charge_ratio
+                'generic_nonionizable' : fully ionized ion with custom
+                                         `mass_ratio` and charge_ratio
+
+            Note : 'ion'and 'generic_ionizable' need `element` argument
+
 
         initial_positions : list
             Method to initialize particles in cell. First element
@@ -117,7 +124,7 @@ class Particle:
 
         params = {}
         params['name'] = name
-        params['type'] = type
+        params['type'] = species
         params['ParticleShape'] = {1: "CIC",
                                    2: "TSC",
                                    3: "PCS",
@@ -127,62 +134,80 @@ class Particle:
         params['ParticlePusher'] = pusher
         params['Temperature'] = initial_temperature
 
-        if initial_positions[0] == 'Ordered':
-            params['NppcX'] = initial_positions[1][0]
-            params['NppcY'] = initial_positions[1][1]
-            params['NppcZ'] = initial_positions[1][2]
-        elif initial_positions[0] == 'Random':
-            params['Nppc'] = initial_positions[1]
+        if initial_positions is not None:
+            if initial_positions[0] == 'Ordered':
+                params['NppcX'] = initial_positions[1][0]
+                params['NppcY'] = initial_positions[1][1]
+                params['NppcZ'] = initial_positions[1][2]
+            elif initial_positions[0] == 'Random':
+                params['Nppc'] = initial_positions[1]
 
-        if typicalNppc is None:
-            params['TYPICAL_PARTICLES_PER_CELL'] = np.prod(initial_positions[1])
-        else:
+        if typicalNppc is not None:
             params['TYPICAL_PARTICLES_PER_CELL'] = typicalNppc
-
-        params['DensityRatio'] = relative_density
 
         if base_density is not None:
             params["BASE_DENSITY"] = base_density
 
-        if type=='generic_ionizable':
+        params['DensityRatio'] = relative_density
+
+        if species=='generic_ionizable' or species=='ion':
+            if element is None:
+                raise ValueError(f'{species} needs `element` argument')
+
             params["Element"] = element
             params["TargetSpeciesName"] = target_species.name
             params["InitialCharge"] = initial_charge
             params["pol"] = ionizer_polarization
+
+        if species=='generic_ionizable' or species=='generic_nonionizable':
             params["MassRatio"] = mass_ratio
             params["ChargeRatio"] = charge_ratio
+        elif species=='ion':
+            el = table_element(element)
+            params["MassRatio"] = el.mass * atomic_mass / m_e
+            params["ChargeRatio"] = -el.atomic_number
 
-        # Main generic parameters
+        # Converting float and integer arguments to strings
+        for arg in params.keys():
+            if type(params[arg]) == float:
+                # Imposing a fixed float format
+                params[arg] = f"{params[arg]:.15e}"
+            if type(params[arg]) == int:
+                params[arg] = f"{params[arg]:d}"
+
+        # Generic parameters
         template_species = {}
         template_species['filename'] = 'species.template'
         template_species['AppendableArgs'] = {}
         template_species['AppendableArgs']['speciesNumericalParam']=\
             Template(speciesNumericalParam).render(**params)
 
-        # particular species definition:
+        # Species definition
         template_speciesDefinition = {}
         template_speciesDefinition['filename'] = 'speciesDefinition.template'
         template_speciesDefinition['AppendableArgs'] = {}
         template_speciesDefinition['AppendableArgs']['SpeciesDefinition'] = \
-            Template(speciesDefinition[type]).render(**params)
+            Template(speciesDefinition[species]).render(**params)
 
         template_speciesDefinition['CommaAppendableArgs'] = {}
         template_speciesDefinition['CommaAppendableArgs']\
             ['SpeciesRuntimeName'] = 'PIC_' + name
 
-        # Initialization parameters
+        # Initialization features and manipulators
         template_particle = {}
         template_particle['filename'] = 'particle.template'
         if typicalNppc is not None:
             template_particle['MainArgs'] = params
 
         template_particle['AppendableArgs'] = {}
-        template_particle['AppendableArgs']['StartPosition'] = Template( \
-            StartPosition[initial_positions[0]] ).render(**params)
+
+        if initial_positions is not None:
+            template_particle['AppendableArgs']['StartPosition'] = Template( \
+                StartPosition[initial_positions[0]] ).render(**params)
 
         manipulator_list = []
 
-        if type=='generic_ionizable':
+        if species=='generic_ionizable' or species=='ion':
             manipulator_list.append( Template( Manipulators['SetIonCharge'] )\
                 .render(**params) )
 
@@ -193,7 +218,7 @@ class Particle:
         template_particle['AppendableArgs']['Manipulators'] = \
             "\n".join(manipulator_list)
 
-        # Initialization procedure
+        # Species initialization
         template_speciesInitialization = {}
         template_speciesInitialization['filename'] = \
             'speciesInitialization.template'
@@ -204,14 +229,14 @@ class Particle:
         if density_profile is not None:
             createManipulate_list.append( Template(CreateDensity).render(**params))
 
-        if type=='generic_ionizable':
+        if species=='generic_ionizable'  or species=='ion':
             createManipulate_list.append( Template(SetIonCharge).render(**params))
 
         if len(createManipulate_list) != 0:
             template_speciesInitialization['CommaAppendableArgs']\
                 ['CreateManipulate']  = ",\n".join(createManipulate_list)
 
-        # Define density profile
+        # Density profile
         template_density = {}
         template_density['filename'] = 'density.template'
         template_density['AppendableArgs'] = {}

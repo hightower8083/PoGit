@@ -80,6 +80,14 @@ class Laser:
         params['code'] = Template(Antenna[profile][dim])\
             .render(**params)
 
+        # Converting float and integer arguments to strings
+        for arg in params.keys():
+            if type(params[arg]) == float:
+                # Imposing a fixed float format
+                params[arg] = f"{params[arg]:.15e}"
+            if type(params[arg]) == int:
+                params[arg] = f"{params[arg]:d}"
+
         template = {}
         template['filename'] = 'fieldBackground.template'
 

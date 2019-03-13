@@ -14,8 +14,8 @@ class Laser:
         following files:
             include/picongpu/param/laser.param
     """
-    def __init__( self, a0, ctau, waist, cdelay, iy_antenna, y_foc=0,
-                  profile='Gaussian', pol='x', CEP = 0.0,
+    def __init__( self, a0, ctau, waist, cdelay, iy_antenna=0,
+                  y_foc=1e-6, profile='Gaussian', pol='x', CEP = 0.0,
                   wavelength=0.8e-6, LaguerreModeNumber=0,
                   LaguerreModes=[1.,] ):
 
@@ -41,7 +41,8 @@ class Laser:
             Position of the emitting antenna in the box (y coordinate).
 
         y_foc : float (in meters)
-            Laser focal position along y-axis
+            Laser focal position along y-axis. Currently focal position
+            cannot be equal to the antenna position.
 
         profile: string
             Name of the profile defined in `codelets/laser.py`
@@ -69,6 +70,14 @@ class Laser:
         params['LASER_PHASE'] = CEP
         params['MODENUMBER'] = LaguerreModeNumber
         params['LAGUERREMODES'] = ", ".join([str(m) for m in LaguerreModes])
+
+        # Converting float and integer arguments to strings
+        for arg in params.keys():
+            if type(params[arg]) == float:
+                # Imposing a fixed float format
+                params[arg] = f"{params[arg]:.15e}"
+            if type(params[arg]) == int:
+                params[arg] = f"{params[arg]:d}"
 
         template = {}
         template['filename'] = 'laser.template'
