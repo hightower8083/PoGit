@@ -16,7 +16,7 @@ PoGit is based on template manager [Mako](https://github.com/sqlalchemy/mako), b
 
 ## Installation
 
-Clone and install with dependances:
+Clone and install with dependencies:
 ```sh
 git clone https://github.com/hightower8083/PoGit.git
 cd PoGit
