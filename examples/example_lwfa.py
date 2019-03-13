@@ -14,15 +14,13 @@ J_smoothing = 'Binomial'
 # Sizes of the simulation box and grid
 xmax, ymax, zmax = 25e-6, 35e-6, 25e-6
 Nx, Ny, Nz = 128, 1024, 128
+mpi_decomposition = (1, 2, 1)
 
 # Total number of simulations steps
 Nsteps = 6000
 
 # Number of steps between diagnostics
 N_diag = 2000
-
-# MPI decomposition over devices
-mpi_decomp = (1, 2, 1)
 
 ## Laser parameters
 ctau = 4e-6                 # Laser duration in meters
@@ -51,8 +49,9 @@ current_deposition = 'Esirkepov'
 ## Creating simulation objects and writing files
 
 gridSolver = GridSolver( xmax, ymax, zmax, Nx, Ny, Nz, Nsteps,
-                         N_diag, decomposition=mpi_decomp, dim=dim,
-                         solver_scheme=solver_scheme, J_smoothing=J_smoothing,
+                         N_diag, mpi_decomposition, dim=dim,
+                         solver_scheme=solver_scheme,
+                         J_smoothing=J_smoothing,
                          movingWindow=True, movePoint=1.)
 
 laser = Laser( a0=a0, ctau=ctau, waist=waist, iy_antenna=iy_antenna,

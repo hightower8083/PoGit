@@ -6,6 +6,7 @@ from pogit.writer import WriteSimulationFiles
 # Sizes of the simulation box and grid
 xmax, ymax, zmax = 25e-6, 35e-6, 25e-6
 Nx, Ny, Nz = 128, 1024, 128
+mpi_decomposition = (1, 2, 1)
 
 # Total number of simulations steps
 Nsteps = 6000
@@ -28,8 +29,8 @@ density_profile = { 'type': 'Gaussian', 'vacuumCellsY': 100,
          'gasSigmaLeft': 20e-6, 'gasSigmaRight': 80e-6 }
 
 ## Construct simulation
-gridSolver = GridSolver( xmax, ymax, zmax, Nx, Ny, Nz,
-                         Nsteps, N_diag, movingWindow=True)
+gridSolver = GridSolver( xmax, ymax, zmax, Nx, Ny, Nz, Nsteps, N_diag,
+                         mpi_decomposition, movingWindow=True)
 
 laser = Laser( a0=a0, ctau=ctau, waist=waist, cdelay=cdelay )
 

@@ -21,7 +21,7 @@ class GridSolver:
         of interest, and extra-grid is added implicitly
     """
     def __init__( self, xmax, ymax, zmax, Nx, Ny, Nz,
-                  Nsteps, N_diag, decomposition = (1, 2, 1),
+                  Nsteps, N_diag, decomposition,
                   dim='3d', dt_fromCFL=0.995, dt=None, absorber=None,
                   solver_scheme='Yee', J_smoothing=None,
                   movingWindow=False, movePoint=1.0
@@ -33,17 +33,17 @@ class GridSolver:
         xmax, ymax, zmax : float (in meters)
             Lengths of the simulation box in x, y and z directions
 
-        Nx, Ny, Nz : int
+        Nx, Ny, Nz : integer
             Numbers of gridpoints in x, y and z directions
 
-        Nsteps : int
+        Nsteps : integer
             Number of simulation steps to perform
 
-        N_diag : int
+        N_diag : integer
             Number of simulation steps between writing the
             HDF5 diagnostics
 
-        decomposition: tuple (three int)
+        decomposition: tuple (three integers)
             Number of devices used in x, y and z directions
 
         dim : string

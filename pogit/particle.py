@@ -27,7 +27,7 @@ class Particle:
                   base_density=None, relative_density=1.0,
                   element=None, initial_charge=0,
                   mass_ratio=m_p/m_e, charge_ratio=-1,
-                  target_species=None, ionizer_polarization='Circ',
+                  target_species=None, ionizer_polarization='Lin',
                   initial_temperature=None,
                   shape_order=1, pusher='Boris',
                   current_deposition='Esirkepov' ):
@@ -43,13 +43,13 @@ class Particle:
             Type of the species. Presently supported types:
                 'electron' : simple electron
                 'proton' : simple proton
-                'ion' : ion from periodic table (needs `element` argument)
+                'ion' : ion from periodic table
                 'generic_ionizable' : ion from periodic table with custom
-                                      `mass_ratio` and charge_ratio
+                                      `mass_ratio` and `charge_ratio`
                 'generic_nonionizable' : fully ionized ion with custom
-                                         `mass_ratio` and charge_ratio
+                                         `mass_ratio` and `charge_ratio`
 
-            Note : 'ion'and 'generic_ionizable' need `element` argument
+            Note : 'ion'and 'generic_ionizable' need `element` name
 
 
         initial_positions : list
@@ -87,13 +87,13 @@ class Particle:
             Mass of the species in units of electron mass
 
         charge_ratio : float
-            Total charge of the species in units of electron charge
+            Charge of the fully ionized species in units of electron charge
 
         target_species : Particle object
             Species to which ionized electrons are attributed
 
         ionizer_polarization: string
-            Polarization of ionizing radiation, 'Circ' or 'Lin'
+            Polarization of ionizing radiation, 'Circ' or 'Lin' (for ADK)
 
         initial_temperature : float
             Initial temperature of the species in keV
@@ -114,7 +114,7 @@ class Particle:
                 "Axel": a pusher developed at HZDR during 2011 (testing)
 
         current_deposition : string
-            Sheme of current deposition. Can be:
+            Scheme of current deposition. Can be:
                 "Esirkepov" : charge conservative deposition (1st to 4th order)
                 "VillaBune": (1st order)
                 "EmZ": (1st to 4th order)
