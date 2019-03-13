@@ -2,7 +2,7 @@
 
 Utility to generate the [PIConGPU](https://github.com/ComputationalRadiationPhysics/picongpu) input files using a Pythonic API, simillar as used in the python-based codes (e.g.  [WARP](https://bitbucket.org/berkeleylab/warp), [FBPIC](https://github.com/fbpic/fbpic), [CHIMERA](https://github.com/hightower8083/chimera)/[CHIMERA.CL](https://github.com/hightower8083/chimeraCL)).
 
-This is an early development and its purpose is to search a robust strategy for PIConGPU templating. In future it may merge [PICME](https://github.com/picmi-standard/picmi) project.
+This is an early development and its purpose is to search a robust strategy for PIConGPU templating. In future may merge [PICMI](https://github.com/picmi-standard/picmi) project.
 
 Currently the following basic functionality is covered:
 - grid-solver class defines and adjusts the simulation domain, solver scheme and parameters, handles the simulation run and diagnostics.
@@ -33,7 +33,8 @@ rm -r include/picongpu/param/* .build/
 python example_lwfa.py
 ```
 
-Script will generate input files at `./include/picongpu/param` and a launcher configuration `./etc/picongpu/run.cfg`. Here is simplest example as input for a case of laser plasma acceleration of electrons:
+Script will generate input files at `./include/picongpu/param` and a launcher configuration `./etc/picongpu/run.cfg`
+Here is simplest input for a case of laser plasma acceleration of electrons:
 ```python
 from pogit.laser import Laser
 from pogit.grid import GridSolver

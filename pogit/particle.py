@@ -43,13 +43,13 @@ class Particle:
             Type of the species. Presently supported types:
                 'electron' : simple electron
                 'proton' : simple proton
-                'ion' : ion from periodic table (needs `element` argument)
+                'ion' : ion from periodic table
                 'generic_ionizable' : ion from periodic table with custom
-                                      `mass_ratio` and charge_ratio
+                                      `mass_ratio` and `charge_ratio`
                 'generic_nonionizable' : fully ionized ion with custom
-                                         `mass_ratio` and charge_ratio
+                                         `mass_ratio` and `charge_ratio`
 
-            Note : 'ion'and 'generic_ionizable' need `element` argument
+            Note : 'ion'and 'generic_ionizable' need `element` name
 
 
         initial_positions : list
