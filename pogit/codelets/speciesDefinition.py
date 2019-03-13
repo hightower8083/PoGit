@@ -1,6 +1,6 @@
 speciesDefinition = {}
 
-speciesDefinition['generic_ionizable'] = \
+speciesDefinition['ion'] = \
 """
 value_identifier( float_X, MassRatio${name}, ${MassRatio} );
 value_identifier( float_X, ChargeRatio${name}, ${ChargeRatio} );
@@ -29,6 +29,30 @@ using PIC_${name} = Particles<
     PMACC_CSTRING( "${name}" ),
     ParticleFlags${name},
     IonParticleAttributes
+>;"""
+
+speciesDefinition['generic_ionizable'] = speciesDefinition['ion']
+
+speciesDefinition['generic_nonionizable'] = \
+"""
+value_identifier( float_X, MassRatio${name}, ${MassRatio} );
+value_identifier( float_X, ChargeRatio${name}, ${ChargeRatio} );
+value_identifier( float_X, DensityRatio${name}, ${DensityRatio} );
+
+using ParticleFlags${name} = MakeSeq_t<
+    particlePusher< UsedParticlePusher${name} >,
+    shape< UsedParticleShape${name} >,
+    interpolation< UsedField2Particle${name} >,
+    current< UsedParticleCurrentSolver${name} >,
+    massRatio< MassRatio${name} >,
+    chargeRatio< ChargeRatio${name} >,
+    densityRatio< DensityRatio${name} >
+>;
+
+using PIC_${name} = Particles<
+    PMACC_CSTRING( "${name}" ),
+    ParticleFlags${name},
+    DefaultParticleAttributes
 >;"""
 
 speciesDefinition['electron'] = \
@@ -67,8 +91,7 @@ using ParticleFlags${name} = MakeSeq_t<
     current< UsedParticleCurrentSolver${name} >,
     massRatio< MassRatio${name} >,
     chargeRatio< ChargeRatio${name} >,
-    densityRatio< DensityRatio${name} >,
-    atomicNumbers< ionization::atomicNumbers::Hydrogen_t >
+    densityRatio< DensityRatio${name} >
 >;
 
 /* define species ions */

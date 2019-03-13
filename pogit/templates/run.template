@@ -47,7 +47,7 @@ TBG_movingWindow="${movingWindow}"
 #################################
 
 # HDF5 raw data output (DISABLED, add to TBG_plugins below to ENABLE!)
-TBG_hdf5="--hdf5.period 1000   \
+TBG_hdf5="--hdf5.period ${N_diag}   \
           --hdf5.file simData \
           --hdf5.source 'species_all, fields_all' "
 

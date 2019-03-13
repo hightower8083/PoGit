@@ -8,15 +8,18 @@ from pogit.writer import WriteSimulationFiles
 dim = '3d'
 
 # Solver choice and features
-solver_type = 'Yee'
+solver_scheme = 'Lehe'
 J_smoothing = 'Binomial'
 
 # Sizes of the simulation box and grid
-xmax, ymax, zmax = 30e-6, 70e-6, 30e-6
-Nx, Ny, Nz = 128, 2048, 128
+xmax, ymax, zmax = 25e-6, 35e-6, 25e-6
+Nx, Ny, Nz = 128, 1024, 128
 
-# Number of simulations steps
+# Total number of simulations steps
 Nsteps = 6000
+
+# Number of steps between diagnostics
+N_diag = 2000
 
 # MPI decomposition over devices
 mpi_decomp = (1, 2, 1)
@@ -25,14 +28,14 @@ mpi_decomp = (1, 2, 1)
 ctau = 4e-6                 # Laser duration in meters
 a0 = 3.0                    # Laser normalized amplitude
 waist = 5.0e-6              # Laser waist in meters
-y0 = -2.5 * ctau            # Initial position of laser centroid
-y_antenna = 3e-6            # Position of antenna in meters
-i_center = (Nx//2, Nz//2)   # Transverse position of antenna in cells
-laser_profile = 'GaussianCIRCULAR'
+cdelay = 3 * ctau          # Delay of laser centroid in meters
+laser_profile = 'Gaussian'  # laser profile name
+polarisation = 'x'          # laser polarisation
+iy_antenna = 72             # Position of antenna # (8 cells from absorber)
 
 ## Plasma parameters
 # Base density
-ne = 8e18 * 1e6
+n_e = 8e18 * 1e6
 
 # Density profile defined in `codelets/density.py`
 density_profile = { 'type': 'Gaussian', 'vacuumCellsY': 100,
@@ -48,23 +51,25 @@ current_deposition = 'Esirkepov'
 ## Creating simulation objects and writing files
 
 gridSolver = GridSolver( xmax, ymax, zmax, Nx, Ny, Nz, Nsteps,
-                         decomposition=mpi_decomp, dim=dim,
-                         type=solver_type, J_smoothing=J_smoothing,
-                         movingWindow=True, movePoint=1)
+                         N_diag, decomposition=mpi_decomp, dim=dim,
+                         solver_scheme=solver_scheme, J_smoothing=J_smoothing,
+                         movingWindow=True, movePoint=1.)
 
-laser = Laser( a0=a0, ctau=ctau, waist=waist, y_antenna=y_antenna,
-               y0=y0, profile=laser_profile, i_center=i_center, dim=dim )
+laser = Laser( a0=a0, ctau=ctau, waist=waist, iy_antenna=iy_antenna,
+               cdelay=cdelay, profile=laser_profile, pol=polarisation)
 
-eons = Particle( name='Electrons', type='electron',
-                 density_profile=density_profile, base_density=ne,
-                 initial_positions=initial_positions, pusher=pusher,
-                 current_deposition=current_deposition,
-                 typicalNppc=initial_positions[1] )
-
-ions = Particle( name='Protons', type='proton', pusher=pusher,
+eons = Particle( name='Electrons', species='electron',
+                 base_density=n_e, typicalNppc = 2*initial_positions[1],
                  density_profile=density_profile,
                  initial_positions=initial_positions,
+                 pusher=pusher, shape_order=shape_order,
                  current_deposition=current_deposition )
-# Note: only one species can define `base_density` and `typicalNppc`
+
+ions = Particle( name='Protons', species='proton',
+                 density_profile=density_profile,
+                 initial_positions=initial_positions,
+                 pusher=pusher, shape_order=shape_order,
+                 current_deposition=current_deposition )
+# Note: only one species should define `base_density` and `typicalNppc`
 
 WriteSimulationFiles( ( eons, ions, gridSolver, laser ) )
