@@ -6,6 +6,7 @@ from pogit.writer import WriteSimulationFiles
 # Sizes of the simulation box and grid
 xmax, ymax, zmax = 25e-6, 35e-6, 25e-6
 Nx, Ny, Nz = 128, 1024, 128
+mpi_decomposition = (1, 2, 1)
 
 # Total number of simulations steps
 Nsteps = 6000
@@ -34,7 +35,8 @@ initial_positions = ('Random', 2)
 ## Creating simulation objects and writing files
 
 gridSolver = GridSolver( xmax, ymax, zmax, Nx, Ny, Nz, Nsteps,
-                         N_diag, movingWindow=True, movePoint=1.)
+                         N_diag, mpi_decomposition, movingWindow=True,
+                         movePoint=1. )
 
 laser = Laser( a0=a0, ctau=ctau, waist=waist, cdelay=cdelay)
 
@@ -45,7 +47,7 @@ ions = Particle( name='Ions', species='ion',
                  density_profile=density_profile,
                  initial_positions=initial_positions,
                  element='Nitrogen', initial_charge=5,
-                 target_species=eons, ionizer_polarization='Lin' )
+                 target_species=eons )
 # Note: only one species can define `base_density` and `typicalNppc`
 
 WriteSimulationFiles( ( eons, ions, gridSolver, laser ) )
