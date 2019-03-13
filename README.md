@@ -33,7 +33,7 @@ rm -r include/picongpu/param/* .build/
 python example_lwfa.py
 ```
 
-Code will generate input files at `./include/picongpu/param` and a launcher configuration `./etc/picongpurun.cfg`. Here is simplest example as input for a case of laser plasma acceleration of electrons:
+Script will generate input files at `./include/picongpu/param` and a launcher configuration `./etc/picongpu/run.cfg`. Here is simplest example as input for a case of laser plasma acceleration of electrons:
 ```python
 from pogit.laser import Laser
 from pogit.grid import GridSolver
