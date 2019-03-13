@@ -25,7 +25,7 @@ cdelay = 3 * ctau          # Delay of laser centroid in meters
 n_p = 8e18/5 * 1e6
 
 # Density profile defined in `codelets/density.py`
-density_profile = { 'type': 'Gaussian', 'vacuumCellsY': 100,
+density_profile = { 'name': 'Gaussian', 'vacuumCellsY': 100,
          'gasFactor': -1.0, 'gasPower': 4.0,
          'gasCenterLeft': 40e-6, 'gasCenterRight': 60e-6,
          'gasSigmaLeft': 20e-6, 'gasSigmaRight': 80e-6 }

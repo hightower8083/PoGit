@@ -61,7 +61,7 @@ cdelay = 3 * ctau           # Delay of laser centroid in meters
 ## Plasma
 n_e = 8e18 * 1e6
 initial_positions = ('Random', 2)
-density_profile = { 'type': 'Gaussian', 'vacuumCellsY': 100,
+density_profile = { 'name': 'Gaussian', 'vacuumCellsY': 100,
          'gasFactor': -1.0, 'gasPower': 4.0,
          'gasCenterLeft': 40e-6, 'gasCenterRight': 60e-6,
          'gasSigmaLeft': 20e-6, 'gasSigmaRight': 80e-6 }
