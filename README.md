@@ -9,6 +9,7 @@ Currently the following basic functionality is covered:
 - mupltiple definitions and creation of species of basic (`electron`, `proton`) and generic (`ion`) sorts
 - support for native PIConGPU laser implementation
 - low-level model of a current-driven laser antenna (to enable multiple lasers)
+- generic interface for plugins (in particular hdf5 openPMD)
 
 ## Dependencies
 
@@ -39,6 +40,7 @@ Here is simplest input for a case of laser plasma acceleration of electrons:
 from pogit.laser import Laser
 from pogit.grid import GridSolver
 from pogit.particle import Particle
+from pogit.plugins import Plugin
 from pogit.writer import WriteSimulationFiles
 
 # Sizes of the simulation box and grid
@@ -52,7 +54,7 @@ Nsteps = 6000
 # Number of steps between diagnostics
 N_diag = 2000
 
-## Laser parameters
+## Laser
 ctau = 4e-6                 # Laser duration in meters
 a0 = 3.0                    # Laser normalized amplitude
 waist = 5.0e-6              # Laser waist in meters
@@ -61,13 +63,13 @@ cdelay = 3 * ctau           # Delay of laser centroid in meters
 ## Plasma
 n_e = 8e18 * 1e6
 initial_positions = ('Random', 2)
-density_profile = { 'type': 'Gaussian', 'vacuumCellsY': 100,
+density_profile = { 'name': 'Gaussian', 'vacuumCellsY': 100,
          'gasFactor': -1.0, 'gasPower': 4.0,
          'gasCenterLeft': 40e-6, 'gasCenterRight': 60e-6,
          'gasSigmaLeft': 20e-6, 'gasSigmaRight': 80e-6 }
 
 ## Construct simulation
-gridSolver = GridSolver( xmax, ymax, zmax, Nx, Ny, Nz, Nsteps, N_diag,
+gridSolver = GridSolver( xmax, ymax, zmax, Nx, Ny, Nz, Nsteps,
                          mpi_decomposition, movingWindow=True)
 
 laser = Laser( a0=a0, ctau=ctau, waist=waist, cdelay=cdelay )
@@ -77,7 +79,9 @@ eons = Particle( name='Electrons', species='electron',
                  initial_positions=initial_positions,
                  density_profile=density_profile )
 
-WriteSimulationFiles( (eons, gridSolver, laser) )
+diags = Plugin( period=N_diag )
+
+WriteSimulationFiles( (eons, gridSolver, laser, diags) )
 ```
 
 This and more detailed examples can be found in this repository. More information on the main classes and default parameters can be found in their documentation. In order to just read it type something like:

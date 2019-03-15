@@ -1,6 +1,7 @@
 from pogit.laser import Laser
 from pogit.grid import GridSolver
 from pogit.particle import Particle
+from pogit.plugins import Plugin
 from pogit.writer import WriteSimulationFiles
 
 ## Grid and Solver parameters
@@ -36,7 +37,7 @@ iy_antenna = 72             # Position of antenna # (8 cells from absorber)
 n_e = 8e18 * 1e6
 
 # Density profile defined in `codelets/density.py`
-density_profile = { 'type': 'Gaussian', 'vacuumCellsY': 100,
+density_profile = { 'name': 'Gaussian', 'vacuumCellsY': 100,
          'gasFactor': -1.0, 'gasPower': 4.0,
          'gasCenterLeft': 40e-6, 'gasCenterRight': 60e-6,
          'gasSigmaLeft': 20e-6, 'gasSigmaRight': 80e-6 }
@@ -49,7 +50,7 @@ current_deposition = 'Esirkepov'
 ## Creating simulation objects and writing files
 
 gridSolver = GridSolver( xmax, ymax, zmax, Nx, Ny, Nz, Nsteps,
-                         N_diag, mpi_decomposition, dim=dim,
+                         mpi_decomposition, dim=dim,
                          solver_scheme=solver_scheme,
                          J_smoothing=J_smoothing,
                          movingWindow=True, movePoint=1.)
@@ -57,18 +58,20 @@ gridSolver = GridSolver( xmax, ymax, zmax, Nx, Ny, Nz, Nsteps,
 laser = Laser( a0=a0, ctau=ctau, waist=waist, iy_antenna=iy_antenna,
                cdelay=cdelay, profile=laser_profile, pol=polarisation)
 
-eons = Particle( name='Electrons', species='electron',
+eons = Particle( name='Eons', species='electron',
                  base_density=n_e, typicalNppc = 2*initial_positions[1],
                  density_profile=density_profile,
                  initial_positions=initial_positions,
                  pusher=pusher, shape_order=shape_order,
                  current_deposition=current_deposition )
 
-ions = Particle( name='Protons', species='proton',
+ions = Particle( name='Ions', species='proton',
                  density_profile=density_profile,
                  initial_positions=initial_positions,
                  pusher=pusher, shape_order=shape_order,
                  current_deposition=current_deposition )
 # Note: only one species should define `base_density` and `typicalNppc`
 
-WriteSimulationFiles( ( eons, ions, gridSolver, laser ) )
+diags = Plugin( period=N_diag, source='Eons_chargeDensity, E, Eons_all' )
+
+WriteSimulationFiles( (eons, ions, gridSolver, laser, diags) )

@@ -246,7 +246,7 @@ class Particle:
 
         if density_profile is not None:
             template_density['AppendableArgs']['densityProfile'] = Template( \
-                densityProfile[density_profile['type']] ).\
+                densityProfile[density_profile['name']] ).\
                 render(**{**density_profile, **params})
 
         # final set of templates and variables

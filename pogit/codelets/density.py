@@ -13,3 +13,25 @@ densityProfile['Gaussian'] = \
     );
 
     using densityProfile${name} = GaussianImpl< DensityParameter${name} >;"""
+
+densityProfile['Custom'] = \
+"""
+    struct DensityParameter${name}
+    {
+        HDINLINE float_X
+        operator()(
+            const floatD_64& position_SI,
+            const float3_64& cellSize_SI
+        )
+        {
+            const float_64 x( position_SI.x() );
+            const float_64 y( position_SI.y() );
+            const float_64 z( position_SI.z() );
+            float_64 dens = 0.0;
+${Formula}
+            dens *= float_64( dens >= 0.0 );
+            return dens;
+        }
+    };
+
+    using densityProfile${name} = FreeFormulaImpl< DensityParameter${name} >;"""

@@ -21,8 +21,8 @@ class GridSolver:
         of interest, and extra-grid is added implicitly
     """
     def __init__( self, xmax, ymax, zmax, Nx, Ny, Nz,
-                  Nsteps, N_diag, decomposition,
-                  dim='3d', dt_fromCFL=0.995, dt=None, absorber=None,
+                  Nsteps, decomposition, dim='3d',
+                  dt_fromCFL=0.995, dt=None, absorber=None,
                   solver_scheme='Yee', J_smoothing=None,
                   movingWindow=False, movePoint=1.0
                 ):
@@ -38,10 +38,6 @@ class GridSolver:
 
         Nsteps : integer
             Number of simulation steps to perform
-
-        N_diag : integer
-            Number of simulation steps between writing the
-            HDF5 diagnostics
 
         decomposition: tuple (three integers)
             Number of devices used in x, y and z directions
@@ -115,6 +111,8 @@ class GridSolver:
             dy = Ly_loc/Ny_loc
             Ny = Ny_loc * nGPUy
             ymax = Ly_loc * nGPUy
+            print( f"*** Moving window is active; Y-size is increased",
+                f"to {ymax:.2e} ({Ny} cells)" )
         else:
             params['movingWindow'] =  ""
             Ny = np.ceil( 1.*Ny / decomposition[1] / SuperCell[1] ) * \
@@ -127,7 +125,6 @@ class GridSolver:
         params['Ny'] = np.int(Ny)
         params['Nz'] = np.int(Nz)
         params['Nsteps'] = Nsteps
-        params['N_diag'] = N_diag
         params['CELL_WIDTH_SI'] = dx
         params['CELL_HEIGHT_SI'] = dy
         params['CELL_DEPTH_SI'] = dz

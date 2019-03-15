@@ -1,6 +1,7 @@
 from pogit.laser import Laser
 from pogit.grid import GridSolver
 from pogit.particle import Particle
+from pogit.plugins import Plugin
 from pogit.writer import WriteSimulationFiles
 
 # Sizes of the simulation box and grid
@@ -25,7 +26,7 @@ cdelay = 3 * ctau          # Delay of laser centroid in meters
 n_p = 8e18/5 * 1e6
 
 # Density profile defined in `codelets/density.py`
-density_profile = { 'type': 'Gaussian', 'vacuumCellsY': 100,
+density_profile = { 'name': 'Gaussian', 'vacuumCellsY': 100,
          'gasFactor': -1.0, 'gasPower': 4.0,
          'gasCenterLeft': 40e-6, 'gasCenterRight': 60e-6,
          'gasSigmaLeft': 20e-6, 'gasSigmaRight': 80e-6 }
@@ -35,12 +36,12 @@ initial_positions = ('Random', 2)
 ## Creating simulation objects and writing files
 
 gridSolver = GridSolver( xmax, ymax, zmax, Nx, Ny, Nz, Nsteps,
-                         N_diag, mpi_decomposition, movingWindow=True,
+                         mpi_decomposition, movingWindow=True,
                          movePoint=1. )
 
 laser = Laser( a0=a0, ctau=ctau, waist=waist, cdelay=cdelay)
 
-eons = Particle( name='Electrons', species='electron' )
+eons = Particle( name='Eons', species='electron' )
 
 ions = Particle( name='Ions', species='ion',
                  base_density=n_p, typicalNppc=2*initial_positions[1],
@@ -50,4 +51,7 @@ ions = Particle( name='Ions', species='ion',
                  target_species=eons )
 # Note: only one species can define `base_density` and `typicalNppc`
 
-WriteSimulationFiles( ( eons, ions, gridSolver, laser ) )
+diags = Plugin( period=N_diag,
+    source='E, Eons_chargeDensity, Ions_chargeDensity, Eons_all' )
+
+WriteSimulationFiles( ( eons, ions, gridSolver, laser, diags ) )

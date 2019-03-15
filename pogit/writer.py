@@ -37,6 +37,7 @@ def WriteSimulationFiles( objs ):
         templateMainArgs = {}
         templateAppendableArgs = {}
         templateCommaAppendableArgs = {}
+        templateSpaceAppendableArgs = {}
 
         # loop through the objects
         for obj in objs:
@@ -51,21 +52,16 @@ def WriteSimulationFiles( objs ):
                 if 'MainArgs' in objectArgs:
                     templateMainArgs = objectTemplate['MainArgs']
 
-                if 'AppendableArgs' in objectArgs:
-                    for arg in objectTemplate['AppendableArgs'].keys():
-                        if arg not in templateAppendableArgs.keys():
-                            templateAppendableArgs[arg] = []
-
-                        templateAppendableArgs[arg].append(
-                            objectTemplate['AppendableArgs'][arg] )
-
-                if 'CommaAppendableArgs' in objectArgs:
-                    for arg in objectTemplate['CommaAppendableArgs'].keys():
-                        if arg not in templateCommaAppendableArgs.keys():
-                            templateCommaAppendableArgs[arg] = []
-
-                        templateCommaAppendableArgs[arg].append(
-                            objectTemplate['CommaAppendableArgs'][arg] )
+                for ArgType, templateTypeArgs in (
+                    ('AppendableArgs', templateAppendableArgs),
+                    ('CommaAppendableArgs', templateCommaAppendableArgs),
+                    ('SpaceAppendableArgs', templateSpaceAppendableArgs) ):
+                    if ArgType not in objectArgs:
+                        continue
+                    for arg in objectTemplate[ArgType].keys():
+                        if arg not in templateTypeArgs.keys():
+                            templateTypeArgs[arg] = []
+                        templateTypeArgs[arg].append(objectTemplate[ArgType][arg])
 
         for arg in templateAppendableArgs.keys():
             templateAppendableArgs[arg] = '\n'.join( \
@@ -76,9 +72,14 @@ def WriteSimulationFiles( objs ):
                 templateCommaAppendableArgs[arg] = ',\n'.join( \
                     templateCommaAppendableArgs[arg] )
 
+        for arg in templateSpaceAppendableArgs.keys():
+            templateSpaceAppendableArgs[arg] = ' '.join( \
+                templateSpaceAppendableArgs[arg] )
+
         templateArgs = { **templateMainArgs,
                          **templateAppendableArgs,
-                         **templateCommaAppendableArgs }
+                         **templateCommaAppendableArgs,
+                         **templateSpaceAppendableArgs }
 
         if filename.split('.')[0] == 'run':
             filename_dest = filename.replace('template', 'cfg')
