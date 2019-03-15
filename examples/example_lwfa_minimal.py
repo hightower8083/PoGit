@@ -1,6 +1,7 @@
 from pogit.laser import Laser
 from pogit.grid import GridSolver
 from pogit.particle import Particle
+from pogit.plugins import Plugin
 from pogit.writer import WriteSimulationFiles
 
 # Sizes of the simulation box and grid
@@ -29,7 +30,7 @@ density_profile = { 'name': 'Gaussian', 'vacuumCellsY': 100,
          'gasSigmaLeft': 20e-6, 'gasSigmaRight': 80e-6 }
 
 ## Construct simulation
-gridSolver = GridSolver( xmax, ymax, zmax, Nx, Ny, Nz, Nsteps, N_diag,
+gridSolver = GridSolver( xmax, ymax, zmax, Nx, Ny, Nz, Nsteps,
                          mpi_decomposition, movingWindow=True)
 
 laser = Laser( a0=a0, ctau=ctau, waist=waist, cdelay=cdelay )
@@ -39,4 +40,6 @@ eons = Particle( name='Electrons', species='electron',
                  initial_positions=initial_positions,
                  density_profile=density_profile )
 
-WriteSimulationFiles( (eons, gridSolver, laser) )
+diags = Plugin( period=N_diag )
+
+WriteSimulationFiles( (eons, gridSolver, laser, diags) )
