@@ -51,6 +51,7 @@ ions = Particle( name='Ions', species='ion',
                  target_species=eons )
 # Note: only one species can define `base_density` and `typicalNppc`
 
-diags = Plugin( period=N_diag, source='Eons_chargeDensity, E, Eons_all' )
+diags = Plugin( period=N_diag,
+    source='E, Eons_chargeDensity, Ions_chargeDensity, Eons_all' )
 
 WriteSimulationFiles( ( eons, ions, gridSolver, laser, diags ) )
