@@ -115,8 +115,8 @@ class GridSolver:
             dy = Ly_loc/Ny_loc
             Ny = Ny_loc * nGPUy
             ymax = Ly_loc * nGPUy
-            print( f"movingWindow is active; Y-size is increased to {ymax:.2e}",
-                f"({Ny} cells)" )
+            print( f"*** Moving window is active; Y-size is increased",
+                f"to {ymax:.2e} ({Ny} cells)" )
         else:
             params['movingWindow'] =  ""
             Ny = np.ceil( 1.*Ny / decomposition[1] / SuperCell[1] ) * \
