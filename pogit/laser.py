@@ -82,29 +82,26 @@ class Laser:
         params = {}
 
         params['a0'] = a0
-        params['tau'] = ctau / c / 1.17741
         params['w0'] = waist
         params['y_foc'] = y_foc
-        params['injection_duration'] = 2 * cdelay / c / params['tau']
-        params['delay'] = cdelay / c
         params['iy_antenna'] = iy_antenna
         params['wavelength'] = wavelength
-
-        params['ix_cntr'] = center_ij[0]
-        params['iz_cntr'] = center_ij[1]
+        params['CEP'] = CEP
 
         if method=='native':
+            params['tau'] = ctau / c / 2.35482
+            params['injection_duration'] = 2 * cdelay / c / params['tau']
             params['pol'] = { 'x':'LINEAR_X', 'z':'LINEAR_Z',
                               'circ':'CIRCULAR' }[pol]
-            Codelet = LaserProfile
+            params['MODENUMBER'] = LMNum
+            params['LAGUERREMODES'] = ", ".join([str(m) for m in LM])
         elif method=='antenna':
+            params['tau'] = ctau / c
+            params['delay'] = cdelay / c
             params['dim'] = { '2d':'2', '3d':'3' }[dim]
             params['pol'] = { 'x':'1', 'z':'2', 'circ':'3' }[pol]
-            Codelet = LaserAntenna
-
-        params['CEP'] = CEP
-        params['MODENUMBER'] = LMNum
-        params['LAGUERREMODES'] = ", ".join([str(m) for m in LM])
+            params['ix_cntr'] = center_ij[0]
+            params['iz_cntr'] = center_ij[1]
 
         # Converting float and integer arguments to strings
         for arg in params.keys():
