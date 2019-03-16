@@ -1,3 +1,5 @@
+# Laser profiles library for native implementation
+
 LaserProfile = {}
 
 LaserProfile["Gaussian"] = \
@@ -10,14 +12,14 @@ namespace gaussianBeam
 }
     struct GaussianBeamParam
     {
-        static constexpr float_64 WAVE_LENGTH_SI = ${WAVE_LENGTH};
-        static constexpr float_64 AMPLITUDE_SI = -2.0*PI / ::picongpu::SI::ELECTRON_CHARGE_SI * ${A0} / WAVE_LENGTH_SI * ::picongpu::SI::ELECTRON_MASS_SI * ::picongpu::SI::SPEED_OF_LIGHT_SI * ::picongpu::SI::SPEED_OF_LIGHT_SI;
-        static constexpr float_64 PULSE_LENGTH_SI = ${PULSE_LENGTH};
-        static constexpr float_64 W0_SI = ${W0};
-        static constexpr float_64 FOCUS_POS_SI = ${FOCUS_POS};
-        static constexpr float_64 PULSE_INIT = ${PULSE_INIT};
-        static constexpr float_X LASER_PHASE = ${LASER_PHASE};
-        static constexpr uint32_t initPlaneY = ${initPlaneY};
+        static constexpr float_64 WAVE_LENGTH_SI = ${wavelength};
+        static constexpr float_64 AMPLITUDE_SI = -2.0*PI / ::picongpu::SI::ELECTRON_CHARGE_SI * ${a0} / WAVE_LENGTH_SI * ::picongpu::SI::ELECTRON_MASS_SI * ::picongpu::SI::SPEED_OF_LIGHT_SI * ::picongpu::SI::SPEED_OF_LIGHT_SI;
+        static constexpr float_64 PULSE_LENGTH_SI = ${tau};
+        static constexpr float_64 W0_SI = ${w0};
+        static constexpr float_64 FOCUS_POS_SI = ${y_foc};
+        static constexpr float_64 PULSE_INIT = ${injection_duration};
+        static constexpr float_X LASER_PHASE = ${CEP};
+        static constexpr uint32_t initPlaneY = ${iy_antenna};
         using LAGUERREMODES_t = gaussianBeam::LAGUERREMODES_t;
         static constexpr uint32_t MODENUMBER = gaussianBeam::MODENUMBER;
         enum PolarisationType
@@ -26,7 +28,7 @@ namespace gaussianBeam
             LINEAR_Z = 2u,
             CIRCULAR = 4u,
         };
-        static constexpr PolarisationType Polarisation = ${Polarisation};
+        static constexpr PolarisationType Polarisation = ${pol};
     };
     using Selected = GaussianBeam< GaussianBeamParam >;
 """
