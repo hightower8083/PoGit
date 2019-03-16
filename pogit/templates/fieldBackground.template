@@ -29,31 +29,18 @@ namespace picongpu
     class FieldBackgroundE
     {
     public:
-        /* Add this additional field for pushing particles */
         static constexpr bool InfluenceParticlePusher = false;
-
-        /* We use this to calculate your SI input back to our unit system */
         PMACC_ALIGN(m_unitField, const float3_64);
 
         HDINLINE FieldBackgroundE( const float3_64 unitField ) : m_unitField(unitField)
         {}
 
-        /** Specify your background field E(r,t) here
-         *
-         * \param cellIdx The total cell id counted from the start at t = 0
-         * \param currentStep The current time step */
         HDINLINE float3_X
         operator()( const DataSpace<simDim>& cellIdx,
                     const uint32_t currentStep ) const
         {
-            /* example: periodicity of 20 microns ( = 2.0e-5 m) */
             constexpr float_64 period_SI(20.0e-6);
-            /* calculate cells -> SI [m] */
             const float_64 y_SI = cellIdx.y() * SI::CELL_HEIGHT_SI;
-            /* note: you can also transform the time step to seconds by
-             *       multiplying with DELTA_T_SI */
-
-            /* specify your E-Field in V/m and convert to PIConGPU units */
             const float_X sinArg = precisionCast<float_X>( y_SI / period_SI * 2.0 * PI );
             return float3_X(0.0, math::sin( sinArg ) / m_unitField[1], 0.0);
         }
@@ -62,31 +49,17 @@ namespace picongpu
     class FieldBackgroundB
     {
     public:
-        /* Add this additional field for pushing particles */
         static constexpr bool InfluenceParticlePusher = false;
-
-        /* We use this to calculate your SI input back to our unit system */
         PMACC_ALIGN(m_unitField, const float3_64);
 
         HDINLINE FieldBackgroundB( const float3_64 unitField ) : m_unitField(unitField)
         {}
-
-        /** Specify your background field B(r,t) here
-         *
-         * \param cellIdx The total cell id counted from the start at t=0
-         * \param currentStep The current time step */
         HDINLINE float3_X
         operator()( const DataSpace<simDim>& cellIdx,
                     const uint32_t currentStep ) const
         {
-            /* example: periodicity of 20 microns ( = 2.0e-5 m) */
             constexpr float_64 period_SI(20.0e-6);
-            /* calculate cells -> SI -> [m] */
             const float_64 y_SI = cellIdx.y() * SI::CELL_HEIGHT_SI;
-            /* note: you can also transform the time step to seconds by
-             *       multiplying with DELTA_T_SI */
-
-            /* specify your B-Field in T and convert to PIConGPU units */
             const float_X sinArg = precisionCast<float_X>( y_SI / period_SI * 2.0 * PI );
             return float3_X(0.0, math::cos( sinArg ) / m_unitField[1], 0.0);
         }
@@ -95,29 +68,20 @@ namespace picongpu
     class FieldBackgroundJ
     {
     public:
-        /* Add this additional field? */
         static constexpr bool activated = true;
-
-        /* We use this to calculate your SI input back to our unit system */
         PMACC_ALIGN(m_unitField, const float3_64);
-
         HDINLINE FieldBackgroundJ( const float3_64 unitField ) : m_unitField(unitField)
         {}
 
-        /** Specify your background field J(r,t) here
-         *
-         * \param cellIdx The total cell id counted from the start at t=0
-         * \param currentStep The current time step */
         HDINLINE float3_X
         operator()( const DataSpace<simDim>& cellIdx,
                     const uint32_t currentStep ) const
         {
-            float_64 current_comp_x = 0.0;
-            float_64 current_comp_z = 0.0;
-            constexpr float_64 dy ( SI::CELL_HEIGHT_SI );
+            float_64 current_comp_1 = 0.0;
+            float_64 current_comp_2 = 0.0;
             ${Antenna}
 
-            return float3_X( precisionCast<float_X>(current_comp_x) / m_unitField.x(), 0.0, precisionCast<float_X>(current_comp_z) / m_unitField.z() );
+            return float3_X( precisionCast<float_X>(current_comp_1) / m_unitField.x(), 0.0, precisionCast<float_X>(current_comp_2) / m_unitField.z() );
         }
     };
 

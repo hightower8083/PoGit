@@ -3,21 +3,25 @@ import numpy as np
 from scipy.constants import c
 
 from .codelets.laser import LaserProfile
+from .codelets.fieldBackground import LaserAntenna
 
 
 class Laser:
     """
-    Class that contains parameters of the laser defined in PIConGPU
+    Class that defines laser using either native PIConGPU
+    method or current-driven antenna (multiple sources)
+
     Main attributes
     ---------------
         List of `templates`, which are to be rendered in the
         following files:
             include/picongpu/param/laser.param
+            include/picongpu/param/fieldBackground.param
     """
     def __init__( self, a0, ctau, waist, cdelay, iy_antenna=0,
                   y_foc=0.0, profile='Gaussian', pol='x', CEP = 0.0,
-                  wavelength=0.8e-6, LaguerreModeNumber=0,
-                  LaguerreModes=[1.,] ):
+                  wavelength=0.8e-6, method='native', LMNum=0, LM=[1.,],
+                  dim='3d', center_ij=(0,0) ):
 
         """
         Initialize the Laser object
@@ -54,21 +58,53 @@ class Laser:
 
         wavelength : float (in meters)
             Laser wavelength
+
+        method : string
+            Method of field egeneration to be used. Can be:
+              'native': Native method of PIConGPU. Allows multiple Laguerre
+                modes, and can disable absorber at (Y=0). Presently, only
+                single laser definition is allowed.
+              'antenna': Generate laser by electric current in the Y-plane.
+                Allows multiple definitons. Extendable in codelets
+
+        LMNum : integer
+            Number of Laguerre modes for tranverse profile (used by 'native')
+
+        LM : list
+            List of coefficients of Laguerre modes (used by 'native')
+
+        dim: string
+            Dimensionality, '3d' or '2d' (used by 'antenna')
+
+        center_ij : tuple (2 integers)
+            X and Z indicies of the laser axis on the simulation grid
         """
         params = {}
 
-        params['A0'] = a0
-        params['PULSE_LENGTH'] = ctau / c / 1.17741
-        params['W0'] = waist
-        params['FOCUS_POS'] = y_foc
-        params['PULSE_INIT'] = 2 * cdelay / c / params['PULSE_LENGTH']
-        params['initPlaneY'] = iy_antenna
-        params['WAVE_LENGTH'] = wavelength
-        params['Polarisation'] = {'x':'LINEAR_X', 'z':'LINEAR_Z',
-                                  'circ':'CIRCULAR'}[pol]
-        params['LASER_PHASE'] = CEP
-        params['MODENUMBER'] = LaguerreModeNumber
-        params['LAGUERREMODES'] = ", ".join([str(m) for m in LaguerreModes])
+        params['a0'] = a0
+        params['tau'] = ctau / c / 1.17741
+        params['w0'] = waist
+        params['y_foc'] = y_foc
+        params['injection_duration'] = 2 * cdelay / c / params['tau']
+        params['delay'] = cdelay / c
+        params['iy_antenna'] = iy_antenna
+        params['wavelength'] = wavelength
+
+        params['ix_cntr'] = center_ij[0]
+        params['iz_cntr'] = center_ij[1]
+
+        if method=='native':
+            params['pol'] = { 'x':'LINEAR_X', 'z':'LINEAR_Z',
+                              'circ':'CIRCULAR' }[pol]
+            Codelet = LaserProfile
+        elif method=='antenna':
+            params['dim'] = { '2d':'2', '3d':'3' }[dim]
+            params['pol'] = { 'x':'1', 'z':'2', 'circ':'3' }[pol]
+            Codelet = LaserAntenna
+
+        params['CEP'] = CEP
+        params['MODENUMBER'] = LMNum
+        params['LAGUERREMODES'] = ", ".join([str(m) for m in LM])
 
         # Converting float and integer arguments to strings
         for arg in params.keys():
@@ -79,10 +115,17 @@ class Laser:
                 params[arg] = f"{params[arg]:d}"
 
         template = {}
-        template['filename'] = 'laser.template'
+        if method=='native':
+            template['filename'] = 'laser.template'
+            template['MainArgs'] = {}
+            template['MainArgs']["laserProfile"] = Template( \
+                LaserProfile[profile] ).render(**params)
 
-        template['MainArgs'] = {}
-        template['MainArgs']["laserProfile"] = Template( \
-            LaserProfile[profile] ).render(**params)
+        elif method=='antenna':
+            template['filename'] = 'fieldBackground.template'
+
+            template['AppendableArgs'] = {}
+            template['AppendableArgs']['Antenna'] = Template( \
+               LaserAntenna[profile] ).render(**params)
 
         self.templates = [template,]
