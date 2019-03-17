@@ -92,7 +92,7 @@ def WriteSimulationFiles( objs ):
             with open(path_include+filename_dest, mode='w') as file:
                 file.writelines(template.render(**templateArgs))
 
-        print(filename_dest)
+        print('\t', filename_dest)
 
 def WriteAndRunLocally( objs, sim_name='run' , output_path="$PIC_SCRATCH" ):
     """
@@ -105,15 +105,19 @@ def WriteAndRunLocally( objs, sim_name='run' , output_path="$PIC_SCRATCH" ):
     path_include = './include/picongpu/param/'
     path_etc = './etc/picongpu/'
 
-    # Clean the param files, previous build, and output folder
-    os.system(f'rm -rf {path_include}*.param .build {output_path}/{sim_name}')
+    # Clean the previous build, and output folders
+    print('*** REMOVE THE USED FOLDERS')
+    os.system(f'rm -rf .build {output_path}/{sim_name}')
 
     # Generate the param files
+    print('*** GENERATE THE SIMULATION INPUT')
     WriteSimulationFiles( objs )
 
     # Build PIConGPU
-    os.system('pic-build')
+    print('*** BUILD PIConGPU')
+    os.system('pic-build >/dev/null 2>&1')
 
     # Run the simulation using local bash submission
+    print('*** RUN THE SIMULATION')
     os.system( 'tbg -s bash -c etc/picongpu/run.cfg' + \
               f' -t etc/picongpu/bash/mpiexec.tpl {output_path}/{sim_name}' )
