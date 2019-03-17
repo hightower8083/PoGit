@@ -7,9 +7,9 @@ This is an early development and its purpose is to search a robust strategy for 
 Currently the following basic functionality is covered:
 - grid-solver class defines and adjusts the simulation domain, solver scheme and parameters, handles the simulation run and diagnostics.
 - mupltiple definitions and creation of species of basic (`electron`, `proton`) and generic (`ion`) sorts
-- support for native PIConGPU laser implementation
-- low-level model of a current-driven laser antenna (to enable multiple lasers)
+- support for native PIConGPU and current-driven antenna laser implementations
 - generic interface for plugins (in particular hdf5 openPMD)
+- utility to run simulation series
 
 ## Dependencies
 
@@ -84,7 +84,9 @@ diags = Plugin( period=N_diag )
 WriteSimulationFiles( (eons, gridSolver, laser, diags) )
 ```
 
-This and more detailed examples can be found in this repository. More information on the main classes and default parameters can be found in their documentation. In order to just read it type something like:
+This and more detailed examples, including a simulations scan, can be found in this repository.
+
+More information on the main classes and default parameters can be found in their documentation. In order to just read it type something like:
 ```sh
 python -c "from pogit.grid import GridSolver as _; help(_)"
 python -c "from pogit.particle import Particle as _; help(_)"
@@ -92,4 +94,4 @@ python -c "from pogit.particle import Particle as _; help(_)"
 
 ## Contributing
 
-Everybody interested is greatly welcome to contribute. Many things are to be done: manipulators, filters, diagnoctics etc.
+Everybody interested is greatly welcome to contribute, by extending codelet library (manipulators, filters, plugins) or finding bug and ambiguities.
