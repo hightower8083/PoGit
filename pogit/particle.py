@@ -37,7 +37,10 @@ class Particle:
         Parameters
         ----------
         name : string
-            Name of the particle species
+            Name of the particle species.
+            NB: These names are given to the code variables, and usage of special
+            symbols (interpreted by compiler), e.g. `+`, `-` or spaces is not 
+            allowed
 
         species : string
             Type of the species. Presently supported types:

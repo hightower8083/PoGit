@@ -111,7 +111,7 @@ class GridSolver:
             dy = Ly_loc/Ny_loc
             Ny = Ny_loc * nGPUy
             ymax = Ly_loc * nGPUy
-            print( f"*** Moving window is active; Y-size is increased",
+            print( f"*** MOVING WINDOW IS ACTIVE: Y-size is increased",
                 f"to {ymax:.2e} ({Ny} cells)" )
         else:
             params['movingWindow'] =  ""

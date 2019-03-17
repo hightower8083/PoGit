@@ -1,8 +1,14 @@
+"""
+This is an eample of using PoGit to setup and run a series of simulations
+(scan) for a LWFA case in electron-proton plasma, with varying doping
+of N+5 ions.
+"""
+
 from pogit.laser import Laser
 from pogit.grid import GridSolver
 from pogit.particle import Particle
 from pogit.plugins import Plugin
-from pogit.writer import WriteSimulationFiles
+from pogit.writer import WriteSimulationFiles, WriteAndRunLocally
 
 # Sizes of the simulation box and grid
 xmax, ymax, zmax = 25e-6, 35e-6, 25e-6
@@ -23,7 +29,7 @@ cdelay = 3 * ctau          # Delay of laser centroid in meters
 
 ## Plasma parameters
 # Base density
-n_p = 8e18/5 * 1e6
+n_p = 8e18 * 1e6
 
 # Density profile defined in `codelets/density.py`
 density_profile = { 'name': 'Gaussian', 'vacuumCellsY': 100,
@@ -41,17 +47,25 @@ gridSolver = GridSolver( xmax, ymax, zmax, Nx, Ny, Nz, Nsteps,
 
 laser = Laser( a0=a0, ctau=ctau, waist=waist, cdelay=cdelay)
 
-eons = Particle( name='Eons', species='electron' )
-
-ions = Particle( name='Ions', species='ion',
+eons = Particle( name='e', species='electron',
                  base_density=n_p, typicalNppc=2*initial_positions[1],
                  density_profile=density_profile,
-                 initial_positions=initial_positions,
-                 element='Nitrogen', initial_charge=5,
-                 target_species=eons )
-# Note: only one species can define `base_density` and `typicalNppc`
+                 initial_positions=initial_positions )
 
-diags = Plugin( period=N_diag,
-    source='E, Eons_chargeDensity, Ions_chargeDensity, Eons_all' )
+protons = Particle( name='p', species='proton',
+                    density_profile=density_profile,
+                    initial_positions=initial_positions )
 
-WriteSimulationFiles( ( eons, ions, gridSolver, laser, diags ) )
+diags = Plugin( period=N_diag, source='E, e_chargeDensity, e_all' )
+
+
+for doping_ratio in [0.01, 0.02, 0.03]:
+    ions = Particle( name='N5', species='ion',
+                     density_profile=density_profile,
+                     initial_positions=initial_positions,
+                     element='Nitrogen', initial_charge=5,
+                     target_species=eons,
+                     relative_density=doping_ratio )
+
+    WriteAndRunLocally( (eons, protons, ions, gridSolver, laser, diags),
+        sim_name=f'ioniz-lwfa-{doping_ratio}', output_path='$PIC_SCRATCH' )

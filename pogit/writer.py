@@ -7,13 +7,15 @@ templatePath = src_path[0] + '/templates/'
 def WriteSimulationFiles( objs ):
     """
     Method which renders all temaplates from the given objects
-    and writes the files.
+    and writes the files. Must be called in the directory, where
+    `./include/picongpu/param/` and `./etc/picongpu/` exist
     """
 
-    # Define and if needed create the output folders
+    # Define the output folders
     path_include = './include/picongpu/param/'
     path_etc = './etc/picongpu/'
 
+    # Create folders if needed (for tests)
     for p in (path_include, path_etc):
         if os.path.exists(p) == False :
             try:
@@ -43,39 +45,39 @@ def WriteSimulationFiles( objs ):
         for obj in objs:
             # loop through the templates of the object
             for objectTemplate in obj.templates:
-                # check if objects affects current template file
+                # check if object affects current template file
                 if objectTemplate['filename'] != filename:
                     continue
 
-                # Gather all arguments
+                # Add main template arguments (once per template)
                 objectArgs = objectTemplate.keys()
                 if 'MainArgs' in objectArgs:
                     templateMainArgs = objectTemplate['MainArgs']
 
-                for ArgType, templateTypeArgs in (
+                # Make lists of appendable codelets
+                for templateArgsStr, templateArgs in (
                     ('AppendableArgs', templateAppendableArgs),
                     ('CommaAppendableArgs', templateCommaAppendableArgs),
                     ('SpaceAppendableArgs', templateSpaceAppendableArgs) ):
-                    if ArgType not in objectArgs:
+                    if templateArgsStr not in objectArgs:
                         continue
-                    for arg in objectTemplate[ArgType].keys():
-                        if arg not in templateTypeArgs.keys():
-                            templateTypeArgs[arg] = []
-                        templateTypeArgs[arg].append(objectTemplate[ArgType][arg])
 
-        for arg in templateAppendableArgs.keys():
-            templateAppendableArgs[arg] = '\n'.join( \
-                templateAppendableArgs[arg] )
+                    for arg in objectTemplate[templateArgsStr].keys():
+                        if arg not in templateArgs.keys():
+                            templateArgs[arg] = []
 
-        for arg in templateCommaAppendableArgs.keys():
-            if len(templateCommaAppendableArgs[arg])>0:
-                templateCommaAppendableArgs[arg] = ',\n'.join( \
-                    templateCommaAppendableArgs[arg] )
+                        templateArgs[arg].append(
+                            objectTemplate[templateArgsStr][arg] )
 
-        for arg in templateSpaceAppendableArgs.keys():
-            templateSpaceAppendableArgs[arg] = ' '.join( \
-                templateSpaceAppendableArgs[arg] )
+        # Stack appendable codelets (reduce lists to strings)
+        for templateArgs, join_str in ( (templateAppendableArgs, '\n'),
+                                        (templateCommaAppendableArgs, ',\n'),
+                                        (templateSpaceAppendableArgs,' ') ):
+            for arg in templateArgs.keys():
+                if len(templateArgs[arg])>0:
+                    templateArgs[arg] = join_str.join( templateArgs[arg] )
 
+        # Make a master dict of all arguments
         templateArgs = { **templateMainArgs,
                          **templateAppendableArgs,
                          **templateCommaAppendableArgs,
@@ -90,4 +92,32 @@ def WriteSimulationFiles( objs ):
             with open(path_include+filename_dest, mode='w') as file:
                 file.writelines(template.render(**templateArgs))
 
-        print(filename_dest)
+        print('\t', filename_dest)
+
+def WriteAndRunLocally( objs, sim_name='run' , output_path="$PIC_SCRATCH" ):
+    """
+    Convenience method to generate the simulation files, build the code and
+    runs the simulation locally
+    NB: this method does some forced folders removal, should be used
+    with care!
+    """
+    # Define the output folders
+    path_include = './include/picongpu/param/'
+    path_etc = './etc/picongpu/'
+
+    # Clean the previous build, and output folders
+    print('*** REMOVE THE USED FOLDERS')
+    os.system(f'rm -rf .build {output_path}/{sim_name}')
+
+    # Generate the param files
+    print('*** GENERATE THE SIMULATION INPUT')
+    WriteSimulationFiles( objs )
+
+    # Build PIConGPU
+    print('*** BUILD PIConGPU')
+    os.system('pic-build >/dev/null 2>&1')
+
+    # Run the simulation using local bash submission
+    print('*** RUN THE SIMULATION')
+    os.system( 'tbg -s bash -c etc/picongpu/run.cfg' + \
+              f' -t etc/picongpu/bash/mpiexec.tpl {output_path}/{sim_name}' )

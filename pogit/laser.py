@@ -90,7 +90,7 @@ class Laser:
 
         if method=='native':
             params['tau'] = ctau / c / 2.35482
-            params['injection_duration'] = 2 * cdelay / c / params['tau']
+            params['injection_duration'] = 2 * cdelay / ctau * 2.35482 # c / params['tau']
             params['pol'] = { 'x':'LINEAR_X', 'z':'LINEAR_Z',
                               'circ':'CIRCULAR' }[pol]
             params['MODENUMBER'] = LMNum
