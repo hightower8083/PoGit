@@ -47,22 +47,35 @@ def WriteSimulationFiles( objs ):
                 if objectTemplate['filename'] != filename:
                     continue
 
-                # Gather all arguments
+                # Add main template arguments (once per template)
                 objectArgs = objectTemplate.keys()
                 if 'MainArgs' in objectArgs:
                     templateMainArgs = objectTemplate['MainArgs']
 
-                for ArgType, templateTypeArgs in (
+                # Make lists of appendable codelets
+                for templateArgsStr, templateArgs in (
                     ('AppendableArgs', templateAppendableArgs),
                     ('CommaAppendableArgs', templateCommaAppendableArgs),
                     ('SpaceAppendableArgs', templateSpaceAppendableArgs) ):
-                    if ArgType not in objectArgs:
+                    if templateArgsStr not in objectArgs:
                         continue
-                    for arg in objectTemplate[ArgType].keys():
-                        if arg not in templateTypeArgs.keys():
-                            templateTypeArgs[arg] = []
-                        templateTypeArgs[arg].append(objectTemplate[ArgType][arg])
 
+                    for arg in objectTemplate[templateArgsStr].keys():
+                        if arg not in templateArgs.keys():
+                            templateArgs[arg] = []
+
+                        templateArgs[arg].append(
+                            objectTemplate[templateArgsStr][arg] )
+
+        # Stack appendable codelets (reduce lists to strings)
+        for templateArgs, join_str in ( (templateAppendableArgs, '\n'),
+                                        (templateCommaAppendableArgs, ',\n'),
+                                        (templateSpaceAppendableArgs,' ') ):
+            for arg in templateArgs.keys():
+                if len(templateArgs[arg])>0:
+                    templateArgs[arg] = join_str.join( templateArgs[arg] )
+
+        """
         for arg in templateAppendableArgs.keys():
             templateAppendableArgs[arg] = '\n'.join( \
                 templateAppendableArgs[arg] )
@@ -75,6 +88,7 @@ def WriteSimulationFiles( objs ):
         for arg in templateSpaceAppendableArgs.keys():
             templateSpaceAppendableArgs[arg] = ' '.join( \
                 templateSpaceAppendableArgs[arg] )
+        """
 
         templateArgs = { **templateMainArgs,
                          **templateAppendableArgs,
