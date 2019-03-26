@@ -175,21 +175,22 @@ class GridSolver:
         # Grid template
         template_grid = {}
         template_grid['filename'] = 'grid.template'
-        template_grid['MainArgs'] = params
+        template_grid['Main'] = params
 
         # Dimension template
         template_dim = {}
         template_dim['filename'] = 'dimension.template'
-        template_dim['MainArgs'] = params
+        template_dim['Main'] = params
 
         # Solver template
         template_solver = {}
         template_solver['filename'] = 'fieldSolver.template'
-        template_solver['MainArgs'] = params
+        template_solver['Main'] = params
 
         # Run script template
         template_run = {}
         template_run['filename'] = 'run.template'
-        template_run['MainArgs'] = params
+        template_run['Main'] = params
 
-        self.templates = [template_grid, template_dim, template_solver, template_run]
+        self.templates = [ template_grid, template_dim, template_solver,
+                           template_run ]

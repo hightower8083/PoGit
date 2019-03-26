@@ -116,15 +116,16 @@ class Laser:
         template = {}
         if method=='native':
             template['filename'] = 'laser.template'
-            template['MainArgs'] = {}
-            template['MainArgs']["laserProfile"] = Template( \
+            template['Main'] = {}
+            template['Main']["laserProfile"] = Template( \
                 LaserProfile[profile] ).render(**params)
 
         elif method=='antenna':
             template['filename'] = 'fieldBackground.template'
 
-            template['AppendableArgs'] = {}
-            template['AppendableArgs']['Antenna'] = Template( \
+            template['Appendable'] = {}
+            template['Appendable']['\n'] = {}
+            template['Appendable']['\n']['Antenna'] = Template( \
                LaserAntenna[profile] ).render(**params)
 
         self.templates = [template,]

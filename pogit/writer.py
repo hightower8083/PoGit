@@ -36,10 +36,9 @@ def WriteSimulationFiles( objs ):
         template = Template( filename=templatePath+filename )
 
         # define dictionaries for main and appendable arguments
-        templateMainArgs = {}
-        templateAppendableArgs = {}
-        templateCommaAppendableArgs = {}
-        templateSpaceAppendableArgs = {}
+        templateMain = {}
+        templateAppendable = {}
+        MainDone = False
 
         # loop through the objects
         for obj in objs:
@@ -49,40 +48,48 @@ def WriteSimulationFiles( objs ):
                 if objectTemplate['filename'] != filename:
                     continue
 
+                args = objectTemplate.keys()  # object arguments list
+
                 # Add main template arguments (once per template)
-                objectArgs = objectTemplate.keys()
-                if 'MainArgs' in objectArgs:
-                    templateMainArgs = objectTemplate['MainArgs']
+                if 'Main' in args and not MainDone:
+                    templateMain = objectTemplate['Main']
+                    MainDone = True
 
-                # Make lists of appendable codelets
-                for templateArgsStr, templateArgs in (
-                    ('AppendableArgs', templateAppendableArgs),
-                    ('CommaAppendableArgs', templateCommaAppendableArgs),
-                    ('SpaceAppendableArgs', templateSpaceAppendableArgs) ):
-                    if templateArgsStr not in objectArgs:
-                        continue
+                # check if object has any appendable codelets are defined
+                if 'Appendable' not in args:
+                    continue
 
-                    for arg in objectTemplate[templateArgsStr].keys():
-                        if arg not in templateArgs.keys():
-                            templateArgs[arg] = []
+                # separator is something like '\n', ',\n', ' '
+                for separator in objectTemplate['Appendable'].keys():
+                    # initialize separator dictionary if needed
+                    if separator not in templateAppendable.keys():
+                        templateAppendable[separator] = {}
 
-                        templateArgs[arg].append(
-                            objectTemplate[templateArgsStr][arg] )
+                    # append object codelets to corresponding template lists
+                    args = objectTemplate['Appendable'][separator].keys()
+                    for arg in args:
+                        # initialize a list for the codelet if needed
+                        if arg not in templateAppendable[separator].keys():
+                            templateAppendable[separator][arg] = []
 
-        # Stack appendable codelets (reduce lists to strings)
-        for templateArgs, join_str in ( (templateAppendableArgs, '\n'),
-                                        (templateCommaAppendableArgs, ',\n'),
-                                        (templateSpaceAppendableArgs,' ') ):
-            for arg in templateArgs.keys():
-                if len(templateArgs[arg])>0:
-                    templateArgs[arg] = join_str.join( templateArgs[arg] )
+                        # append codelet to the template list
+                        templateAppendable[separator][arg].append( \
+                            objectTemplate['Appendable'][separator][arg])
 
-        # Make a master dict of all arguments
-        templateArgs = { **templateMainArgs,
-                         **templateAppendableArgs,
-                         **templateCommaAppendableArgs,
-                         **templateSpaceAppendableArgs }
+        # join appendable codelets with proper separators
+        for separator in templateAppendable.keys():
+            for arg in templateAppendable[separator].keys():
+                # Do only for non-empty lists
+                if len(templateAppendable[separator][arg])>0:
+                    templateAppendable[separator][arg] = \
+                        separator.join(templateAppendable[separator][arg])
 
+        # Merge all arguments into a master dictionary
+        templateArgs = { **templateMain}
+        for separator in templateAppendable.keys():
+            templateArgs = {**templateArgs, **templateAppendable[separator]}
+
+        # render the template and write the files
         if filename.split('.')[0] == 'run':
             filename_dest = filename.replace('template', 'cfg')
             with open(path_etc + filename_dest, mode='w') as file:
@@ -92,6 +99,7 @@ def WriteSimulationFiles( objs ):
             with open(path_include+filename_dest, mode='w') as file:
                 file.writelines(template.render(**templateArgs))
 
+        # print the name of the file
         print('\t', filename_dest)
 
 def WriteAndRunLocally( objs, sim_name='run' , output_path="$PIC_SCRATCH" ):

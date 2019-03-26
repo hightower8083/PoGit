@@ -181,31 +181,34 @@ class Particle:
         # Generic parameters
         template_species = {}
         template_species['filename'] = 'species.template'
-        template_species['AppendableArgs'] = {}
-        template_species['AppendableArgs']['speciesNumericalParam']=\
+        template_species['Appendable'] = {}
+        template_species['Appendable']['\n'] = {}
+        template_species['Appendable']['\n']['speciesNumericalParam']= \
             Template(speciesNumericalParam).render(**params)
 
         # Species definition
         template_speciesDefinition = {}
         template_speciesDefinition['filename'] = 'speciesDefinition.template'
-        template_speciesDefinition['AppendableArgs'] = {}
-        template_speciesDefinition['AppendableArgs']['SpeciesDefinition'] = \
-            Template(speciesDefinition[species]).render(**params)
+        template_speciesDefinition['Appendable'] = {}
+        template_speciesDefinition['Appendable']['\n'] = {}
+        template_speciesDefinition['Appendable'][',\n'] = {}
 
-        template_speciesDefinition['CommaAppendableArgs'] = {}
-        template_speciesDefinition['CommaAppendableArgs']\
-            ['SpeciesRuntimeName'] = 'PIC_' + name
+        template_speciesDefinition['Appendable']['\n']['SpeciesDefinition'] = \
+            Template(speciesDefinition[species]).render(**params)
+        template_speciesDefinition['Appendable'][',\n']['SpeciesRuntimeName'] =\
+            'PIC_' + name
 
         # Initialization features and manipulators
         template_particle = {}
         template_particle['filename'] = 'particle.template'
         if typicalNppc is not None:
-            template_particle['MainArgs'] = params
+            template_particle['Main'] = params
 
-        template_particle['AppendableArgs'] = {}
+        template_particle['Appendable'] = {}
+        template_particle['Appendable']['\n'] = {}
 
         if initial_positions is not None:
-            template_particle['AppendableArgs']['StartPosition'] = Template( \
+            template_particle['Appendable']['\n']['StartPosition'] = Template( \
                 StartPosition[initial_positions[0]] ).render(**params)
 
         manipulator_list = []
@@ -218,7 +221,7 @@ class Particle:
             manipulator_list.append( Template( Manipulators['Temperature'])\
                 .render(**params) )
 
-        template_particle['AppendableArgs']['Manipulators'] = \
+        template_particle['Appendable']['\n']['Manipulators'] = \
             "\n".join(manipulator_list)
 
         # Species initialization
@@ -226,29 +229,33 @@ class Particle:
         template_speciesInitialization['filename'] = \
             'speciesInitialization.template'
 
-        template_speciesInitialization['CommaAppendableArgs'] = {}
+        template_speciesInitialization['Appendable'] = {}
+        template_speciesInitialization['Appendable'][',\n'] = {}
 
         createManipulate_list = []
         if density_profile is not None:
-            createManipulate_list.append( Template(CreateDensity).render(**params))
+            createManipulate_list.append( Template(CreateDensity)\
+                .render(**params))
 
         if species=='generic_ionizable'  or species=='ion':
-            createManipulate_list.append( Template(SetIonCharge).render(**params))
+            createManipulate_list.append( Template(SetIonCharge)\
+                .render(**params))
 
         if len(createManipulate_list) != 0:
-            template_speciesInitialization['CommaAppendableArgs']\
+            template_speciesInitialization['Appendable'][',\n']\
                 ['CreateManipulate']  = ",\n".join(createManipulate_list)
 
         # Density profile
         template_density = {}
         template_density['filename'] = 'density.template'
-        template_density['AppendableArgs'] = {}
+        template_density['Appendable'] = {}
+        template_density['Appendable']['\n'] = {}
 
         if base_density is not None:
-            template_density['MainArgs'] = params
+            template_density['Main'] = params
 
         if density_profile is not None:
-            template_density['AppendableArgs']['densityProfile'] = Template( \
+            template_density['Appendable']['\n']['densityProfile'] = Template(\
                 densityProfile[density_profile['name']] ).\
                 render(**{**density_profile, **params})
 
