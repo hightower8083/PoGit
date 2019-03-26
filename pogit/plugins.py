@@ -28,12 +28,14 @@ class Plugin:
         template_run = {}
         template_run['filename'] = 'run.template'
 
-        template_run['AppendableArgs'] = {}
-        template_run['AppendableArgs']['Plugin']=\
+        template_run['Appendable'] = {}
+        template_run['Appendable']['\n'] = {}
+        template_run['Appendable'][' '] = {}
+
+        template_run['Appendable']['\n']['Plugin']=\
             Template(plugins[type]).render(**params)
 
-        template_run['SpaceAppendableArgs'] = {}
-        template_run['SpaceAppendableArgs']['PluginName'] = \
+        template_run['Appendable'][' ']['PluginName'] = \
             f"!TBG_{name}_{period:d}"
 
         self.templates = [template_run, ]

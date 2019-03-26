@@ -9,7 +9,8 @@ from .codelets.fieldBackground import LaserAntenna
 class Laser:
     """
     Class that defines laser using either native PIConGPU
-    method or current-driven antenna (multiple sources)
+    method or current-driven antenna (multiple sources).
+    Note that methods need some featured arguments to be set.
 
     Main attributes
     ---------------
@@ -77,7 +78,8 @@ class Laser:
             Dimensionality, '3d' or '2d' (used by 'antenna')
 
         center_ij : tuple (2 integers)
-            X and Z indicies of the laser axis on the simulation grid
+            X and Z indicies of the laser axis on the simulation grid.
+            Should be set, for example to `(Nx//2,Nz//2)` (used by 'antenna')
         """
         params = {}
 
@@ -90,7 +92,7 @@ class Laser:
 
         if method=='native':
             params['tau'] = ctau / c / 2.35482
-            params['injection_duration'] = 2 * cdelay / ctau * 2.35482 # c / params['tau']
+            params['injection_duration'] = 2 * cdelay / c / params['tau']
             params['pol'] = { 'x':'LINEAR_X', 'z':'LINEAR_Z',
                               'circ':'CIRCULAR' }[pol]
             params['MODENUMBER'] = LMNum
@@ -114,15 +116,16 @@ class Laser:
         template = {}
         if method=='native':
             template['filename'] = 'laser.template'
-            template['MainArgs'] = {}
-            template['MainArgs']["laserProfile"] = Template( \
+            template['Main'] = {}
+            template['Main']["laserProfile"] = Template( \
                 LaserProfile[profile] ).render(**params)
 
         elif method=='antenna':
             template['filename'] = 'fieldBackground.template'
 
-            template['AppendableArgs'] = {}
-            template['AppendableArgs']['Antenna'] = Template( \
+            template['Appendable'] = {}
+            template['Appendable']['\n'] = {}
+            template['Appendable']['\n']['Antenna'] = Template( \
                LaserAntenna[profile] ).render(**params)
 
         self.templates = [template,]
