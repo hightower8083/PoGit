@@ -67,5 +67,5 @@ for doping_ratio in [0.01, 0.02, 0.03]:
                      target_species=eons,
                      relative_density=doping_ratio )
 
-    WriteAndRunLocally( (eons, protons, ions, gridSolver, laser, diags),
-        sim_name=f'ioniz-lwfa-{doping_ratio}', output_path='$PIC_SCRATCH' )
+    WriteAndSubmit( (eons, protons, ions, gridSolver, laser, diags),
+      sim_name=f'ioniz-lwfa-{doping_ratio}', output_path='$PIC_SCRATCH' )

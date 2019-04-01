@@ -2,14 +2,14 @@
 
 Utility to generate the [PIConGPU](https://github.com/ComputationalRadiationPhysics/picongpu) input files using a Pythonic API, simillar as used in the python-based codes (e.g.  [WARP](https://bitbucket.org/berkeleylab/warp), [FBPIC](https://github.com/fbpic/fbpic), [CHIMERA](https://github.com/hightower8083/chimera)/[CHIMERA.CL](https://github.com/hightower8083/chimeraCL)).
 
-This is an early development and its purpose is to search a robust strategy for PIConGPU templating. In future may merge [PICMI](https://github.com/picmi-standard/picmi) project.
+This is an early development and its purpose is to search a robust strategy for PIConGPU templating. In future may merge with [PICMI](https://github.com/picmi-standard/picmi) project.
 
 Currently the following basic functionality is covered:
-- grid-solver class defines and adjusts the simulation domain, solver scheme and parameters, handles the simulation run and diagnostics.
+- grid-solver class defines and adjusts the simulation domain, solver scheme and parameters, handles the simulation run
 - mupltiple definitions and creation of species of basic (`electron`, `proton`) and generic (`ion`) sorts
 - support for native PIConGPU and current-driven antenna laser implementations
 - generic interface for plugins (in particular hdf5 openPMD)
-- utility to run simulation series
+- tools for convenient run of simulation series
 
 ## Dependencies
 
@@ -34,7 +34,7 @@ rm -r include/picongpu/param/* .build/
 python example_lwfa.py
 ```
 
-Script will generate input files at `./include/picongpu/param` and a launcher configuration `./etc/picongpu/run.cfg`
+Script will generate input files at `./include/picongpu/param` and launcher configuration `./etc/picongpu/run.cfg`
 Here is simplest input for a case of laser plasma acceleration of electrons:
 ```python
 from pogit.laser import Laser
