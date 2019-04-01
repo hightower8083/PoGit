@@ -67,11 +67,12 @@ class Particle:
         typicalNppc : integer
             `Typical` total number of particles per cell used for internal
             PIConGPU normalization. Should account for all species, and be
-            defined only for the one of them.
+            defined only for the one of them
 
-        density_profile : dictionary
+        density_profile : dictionary or list of dictionaries
             Parameters for the density profile defined as a codelet
-            (see example)
+            (see example). Can be the list of profiles, in which case
+            each profile will be generated independently, i.e. summed
 
         base_density : float (1/m^3)
             Base value of number density used for normalization of
@@ -178,6 +179,7 @@ class Particle:
             if type(params[arg]) == int:
                 params[arg] = f"{params[arg]:d}"
 
+        # NOW GO TEMPLATES
         # Generic parameters
         template_species = {}
         template_species['filename'] = 'species.template'
@@ -213,14 +215,17 @@ class Particle:
 
         manipulator_list = []
 
+        # configure initial charge manipulator for ionizable
         if species=='generic_ionizable' or species=='ion':
             manipulator_list.append( Template( Manipulators['SetIonCharge'] )\
                 .render(**params) )
 
+        # configure temperature manipulator
         if initial_temperature is not None:
             manipulator_list.append( Template( Manipulators['Temperature'])\
                 .render(**params) )
 
+        # add manipulators
         template_particle['Appendable']['\n']['Manipulators'] = \
             "\n".join(manipulator_list)
 
@@ -235,19 +240,23 @@ class Particle:
         createManipulate_list = []
         if density_profile is not None:
             if type(density_profile) in (list, tuple):
+                # if multiple entries create with enumerated indices
                 for profile_index, prof in enumerate(density_profile):
                     params['profile_index'] = str(profile_index)
                     createManipulate_list.append( Template(CreateDensity)\
                                                   .render(**params))
             else:
+                # if single entry set index to 0
                 params['profile_index'] = '0'
                 createManipulate_list.append( Template(CreateDensity)\
                                               .render(**params))
 
-        if species=='generic_ionizable'  or species=='ion':
+        # apply initial charge manipulator for ionizable
+        if species=='generic_ionizable' or species=='ion':
             createManipulate_list.append( Template(SetIonCharge)\
                 .render(**params))
 
+        # add manipulator applications
         if len(createManipulate_list) != 0:
             template_speciesInitialization['Appendable'][',\n']\
                 ['CreateManipulate']  = ",\n".join(createManipulate_list)
@@ -261,24 +270,27 @@ class Particle:
         if base_density is not None:
             template_density['Main'] = params
 
+        # Process density profiles
         if density_profile is not None:
             if type(density_profile) in (list, tuple):
-                template_density_local = []
+                # if multiple entries join with enumerated indices and add
+                tmpt_loc = []
                 for profile_index, prof in enumerate(density_profile):
                     params['profile_index'] = str(profile_index)
-                    template_density_local.append( \
-                        Template(densityProfile[prof['name']]) \
+                    tmpt_loc.append( Template(densityProfile[prof['name']] )\
                         .render(**{**prof, **params}) )
 
-                template_density['Appendable']['\n']['densityProfile'] = \
-                    '\n'.join(template_density_local)
+                tmpt_loc = '\n'.join(tmpt_loc)
             else:
+                # if single entry set index to 0
                 params['profile_index'] = '0'
-                template_density['Appendable']['\n']['densityProfile'] = Template(\
-                    densityProfile[density_profile['name']] ).\
-                    render(**{**density_profile, **params})
+                tmpt_loc = Template( densityProfile[density_profile['name']] )\
+                    .render(**{**density_profile, **params})
 
-        # final set of templates and variables
+            # add density profiles
+            template_density['Appendable']['\n']['densityProfile'] = tmpt_loc
+
+        # final set of templates
         self.templates = [ template_species,
                            template_particle,
                            template_speciesDefinition,
