@@ -102,30 +102,34 @@ def WriteSimulationFiles( objs ):
         # print the name of the file
         print('\t', filename_dest)
 
-def WriteAndRunLocally( objs, sim_name='run' , output_path="$PIC_SCRATCH" ):
+def WriteAndSubmit( objs, sim_name='run', output_path="$PIC_SCRATCH",
+                    write_input=True, build=True, run=True, s='bash',
+                    t='etc/picongpu/bash/mpiexec.tpl' ):
     """
     Convenience method to generate the simulation files, build the code and
     runs the simulation locally
     NB: this method does some forced folders removal, should be used
     with care!
     """
-    # Define the output folders
-    path_include = './include/picongpu/param/'
-    path_etc = './etc/picongpu/'
-
-    # Clean the previous build, and output folders
-    print('*** REMOVE THE USED FOLDERS')
-    os.system(f'rm -rf .build {output_path}/{sim_name}')
 
     # Generate the param files
-    print('*** GENERATE THE SIMULATION INPUT')
-    WriteSimulationFiles( objs )
+    if write_input:
+        print('*** GENERATE THE SIMULATION INPUT')
+        WriteSimulationFiles( objs )
 
     # Build PIConGPU
-    print('*** BUILD PIConGPU')
-    os.system('pic-build >/dev/null 2>&1')
+    if build:
+        print('*** BUILD PIConGPU')
+        # Clean the previous build
+        os.system(f'rm -rf .build')
+        os.system('pic-build >/dev/null 2>&1')
 
     # Run the simulation using local bash submission
-    print('*** RUN THE SIMULATION')
-    os.system( 'tbg -s bash -c etc/picongpu/run.cfg' + \
-              f' -t etc/picongpu/bash/mpiexec.tpl {output_path}/{sim_name}' )
+    if run:
+        # Clean the previous output folders
+        print('*** REMOVE THE USED FOLDERS')
+        os.system(f'rm -rf {output_path}/{sim_name}')
+
+        print('*** RUN THE SIMULATION')
+        os.system( f'tbg -s {s} -c etc/picongpu/run.cfg -t {t} '+\
+                   f'{output_path}/{sim_name}' )

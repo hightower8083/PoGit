@@ -1,7 +1,7 @@
 CreateDensity = \
 """
         CreateDensity<
-            densityProfiles::densityProfile${name},
+            densityProfiles::densityProfile${name}${profile_index},
             startPosition::startPosition${name},
             PIC_${name}
         >"""

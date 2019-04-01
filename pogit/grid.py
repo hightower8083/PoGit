@@ -88,8 +88,13 @@ class GridSolver:
 
         if dim=='3d':
             SuperCell = (8, 8, 4)
+            params['SuperCellSize'] = ', '.join([str(s) for s in SuperCell])
+
         elif dim=='2d':
             SuperCell = (16, 16, 1)
+            params['SuperCellSize'] = ', '\
+                .join([str(s) for s in SuperCell[:2]])
+
 
         Nx = np.ceil( 1.*Nx / decomposition[0] / SuperCell[0] ) * \
                               decomposition[0] * SuperCell[0]
@@ -136,7 +141,11 @@ class GridSolver:
         else:
             if dt_fromCFL is None:
                 print("Give either `dt_fromCFL` or `dt`")
-            params['DELTA_T_SI'] = dt_fromCFL/c * (dx**-2+dy**-2+dz**-2)**-.5
+
+            if dim=='3d':
+                params['DELTA_T_SI'] = dt_fromCFL/c * (dx**-2+dy**-2+dz**-2)**-.5
+            elif dim=='2d':
+                params['DELTA_T_SI'] = dt_fromCFL/c * (dx**-2+dy**-2)**-.5
 
         if absorber is None:
             params['absorber'] = {}
@@ -187,10 +196,15 @@ class GridSolver:
         template_solver['filename'] = 'fieldSolver.template'
         template_solver['Main'] = params
 
+        # Memory template
+        template_memory = {}
+        template_memory['filename'] = 'memory.template'
+        template_memory['Main'] = params
+
         # Run script template
         template_run = {}
         template_run['filename'] = 'run.template'
         template_run['Main'] = params
 
         self.templates = [ template_grid, template_dim, template_solver,
-                           template_run ]
+                           template_memory, template_run ]

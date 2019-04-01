@@ -234,8 +234,15 @@ class Particle:
 
         createManipulate_list = []
         if density_profile is not None:
-            createManipulate_list.append( Template(CreateDensity)\
-                .render(**params))
+            if type(density_profile) in (list, tuple):
+                for profile_index, prof in enumerate(density_profile):
+                    params['profile_index'] = str(profile_index)
+                    createManipulate_list.append( Template(CreateDensity)\
+                                                  .render(**params))
+            else:
+                params['profile_index'] = '0'
+                createManipulate_list.append( Template(CreateDensity)\
+                                              .render(**params))
 
         if species=='generic_ionizable'  or species=='ion':
             createManipulate_list.append( Template(SetIonCharge)\
@@ -255,9 +262,21 @@ class Particle:
             template_density['Main'] = params
 
         if density_profile is not None:
-            template_density['Appendable']['\n']['densityProfile'] = Template(\
-                densityProfile[density_profile['name']] ).\
-                render(**{**density_profile, **params})
+            if type(density_profile) in (list, tuple):
+                template_density_local = []
+                for profile_index, prof in enumerate(density_profile):
+                    params['profile_index'] = str(profile_index)
+                    template_density_local.append( \
+                        Template(densityProfile[prof['name']]) \
+                        .render(**{**prof, **params}) )
+
+                template_density['Appendable']['\n']['densityProfile'] = \
+                    '\n'.join(template_density_local)
+            else:
+                params['profile_index'] = '0'
+                template_density['Appendable']['\n']['densityProfile'] = Template(\
+                    densityProfile[density_profile['name']] ).\
+                    render(**{**density_profile, **params})
 
         # final set of templates and variables
         self.templates = [ template_species,

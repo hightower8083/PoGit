@@ -19,13 +19,9 @@
 
 #pragma once
 
-#ifndef PARAM_DIMENSION
-#define PARAM_DIMENSION DIM3
-#endif
-
-#define SIMDIM PARAM_DIMENSION
+#define SIMDIM DIM${simDim}
 
 namespace picongpu
 {
-    constexpr uint32_t simDim = DIM${simDim};
+    constexpr uint32_t simDim = SIMDIM;
 } // namespace picongpu
