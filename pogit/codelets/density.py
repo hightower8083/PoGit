@@ -2,7 +2,7 @@ densityProfile = {}
 
 densityProfile['Gaussian'] = \
 """
-    PMACC_STRUCT(DensityParameter${name},
+    PMACC_STRUCT(DensityParameter${name}${profile_index},
         (PMACC_C_VALUE(float_X, gasFactor, ${gasFactor}))
         (PMACC_C_VALUE(float_X, gasPower, ${gasPower}))
         (PMACC_C_VALUE(uint32_t, vacuumCellsY, ${vacuumCellsY}))
@@ -12,11 +12,11 @@ densityProfile['Gaussian'] = \
         (PMACC_C_VALUE(float_64, gasSigmaRight_SI, ${gasSigmaRight}))
     );
 
-    using densityProfile${name} = GaussianImpl< DensityParameter${name} >;"""
+    using densityProfile${name}${profile_index} = GaussianImpl< DensityParameter${name}${profile_index} >;"""
 
 densityProfile['Custom'] = \
 """
-    struct DensityParameter${name}
+    struct DensityParameter${name}${profile_index}
     {
         HDINLINE float_X
         operator()(
@@ -34,4 +34,4 @@ ${Formula}
         }
     };
 
-    using densityProfile${name} = FreeFormulaImpl< DensityParameter${name} >;"""
+    using densityProfile${name}${profile_index} = FreeFormulaImpl< DensityParameter${name}${profile_index} >;"""
