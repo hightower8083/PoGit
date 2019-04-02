@@ -4,10 +4,12 @@ from scipy.constants import c, atomic_mass, m_e, m_p
 from mendeleev import element as table_element
 
 from .codelets.particle import StartPosition, Manipulators
-from .codelets.speciesDefinition import speciesDefinition
-from .codelets.speciesInitialization import CreateDensity, SetIonCharge
 from .codelets.density import densityProfile
 from .codelets.species import speciesNumericalParam
+from .codelets.speciesDefinition import speciesDefinition
+from .codelets.speciesInitialization import CreateDensity 
+from .codelets.speciesInitialization import SetIonCharge
+from .codelets.speciesInitialization import SetIonNeutral
 
 class Particle:
     """
@@ -253,8 +255,12 @@ class Particle:
 
         # apply initial charge manipulator for ionizable
         if species=='generic_ionizable' or species=='ion':
-            createManipulate_list.append( Template(SetIonCharge)\
-                .render(**params))
+            if initial_charge==0:
+                createManipulate_list.append( Template(SetIonNeutral)\
+                                              .render(**params))
+            else:
+                createManipulate_list.append( Template(SetIonCharge)\
+                                              .render(**params))
 
         # add manipulator applications
         if len(createManipulate_list) != 0:

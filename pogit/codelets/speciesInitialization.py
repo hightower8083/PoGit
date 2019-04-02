@@ -17,3 +17,10 @@ SetIonCharge = \
             PIC_${name},
             PIC_${TargetSpeciesName}
         >"""
+
+SetIonNeutral = \
+"""
+        Manipulate<
+            manipulators::SetIonCharge${name},
+            PIC_${name}
+        >"""
