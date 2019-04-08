@@ -51,3 +51,27 @@ Manipulators['SetIonCharge'] = \
         }
     };
     using SetIonCharge${name} = generic::Free< SetIonChargeImpl${name} >;"""
+
+StartPosition['OnePosition'] = \
+"""
+    // probe particles sit directly in lower corner of the cell
+    CONST_VECTOR(
+        float_X,
+        3,
+        InCellOffset,
+        // each x, y, z in-cell position component in range [0.0, 1.0)
+        ${offX},
+        ${offY},
+        ${offZ}
+    );
+    struct OnePositionParameter${name}
+    {
+        /** Count of particles per cell at initial state
+         *
+         *  unit: none
+         */
+        static constexpr uint32_t numParticlesPerCell = ${Nppc}u;
+
+        const InCellOffset_t inCellOffset;
+    };
+    using startPosition${name} = OnePositionImpl< OnePositionParameter${name} >;"""

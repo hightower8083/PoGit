@@ -65,6 +65,10 @@ class Particle:
                             (NppcX,NppcX,NppcZ)
                 'Random': random positions in cell, with total number
                           defined as an integer Nppc
+                'OnePosition': put all particles at the same position in the
+                               cell, needs an integer for number of particles
+                               per cell and tuple for the normalized [0.0, 1.0)
+                               in-cell offset [Nppc, (offX, offY, offZ)]
 
         typicalNppc : integer
             `Typical` total number of particles per cell used for internal
@@ -137,7 +141,10 @@ class Particle:
                                    4: "P4S"}[shape_order]
 
         params['CurrentSolver'] =  current_deposition
-        params['ParticlePusher'] = pusher
+        if params['type']=='probe':
+            params['ParticlePusher'] = 'Probe'
+        else:
+            params['ParticlePusher'] = pusher
         params['Temperature'] = initial_temperature
 
         if initial_positions is not None:
@@ -147,6 +154,11 @@ class Particle:
                 params['NppcZ'] = initial_positions[1][2]
             elif initial_positions[0] == 'Random':
                 params['Nppc'] = initial_positions[1]
+            elif initial_positions[0] == 'OnePosition':
+                params['Nppc'] = initial_positions[1]
+                params['offX'] = initial_positions[2][0]
+                params['offY'] = initial_positions[2][1]
+                params['offZ'] = initial_positions[2][2]
 
         if typicalNppc is not None:
             params['TYPICAL_PARTICLES_PER_CELL'] = typicalNppc
