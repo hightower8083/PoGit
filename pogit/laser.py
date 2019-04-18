@@ -21,7 +21,7 @@ class Laser:
             include/picongpu/param/fieldBackground.param
     """
     def __init__( self, a0, ctau, waist, cdelay, iy_antenna=0,
-                  y_foc=0.0, profile='Gaussian', pol='x', CEP = 0.0,
+                  y_foc=0.0, profile='Gaussian', pol='x', CEP=0.0,
                   wavelength=0.8e-6, method='native', LMNum=0, LM=[1.,],
                   dim='3d', center_ij=(0,0) ):
 

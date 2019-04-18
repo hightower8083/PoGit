@@ -30,7 +30,7 @@
 ## Section: Required Variables ##
 #################################
 
-TBG_wallTime="2:00:00"
+TBG_wallTime="${wallTimeH}:${wallTimeM}:${wallTimeS}"
 
 TBG_devices_x=${nGPUx}
 TBG_devices_y=${nGPUy}
