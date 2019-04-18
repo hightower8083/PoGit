@@ -8,7 +8,7 @@ from pogit.laser import Laser
 from pogit.grid import GridSolver
 from pogit.particle import Particle
 from pogit.plugins import Plugin
-from pogit.writer import WriteSimulationFiles, WriteAndRunLocally
+from pogit.writer import WriteAndSubmit
 
 # Sizes of the simulation box and grid
 xmax, ymax, zmax = 25e-6, 35e-6, 25e-6

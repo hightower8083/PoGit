@@ -4,7 +4,8 @@ from scipy.constants import c
 
 from .codelets.laser import LaserProfile
 from .codelets.fieldBackground import LaserAntenna
-
+from .codelets.fieldBackground import r2_2d, r2_3d
+from .codelets.fieldBackground import laser_profile_2d, laser_profile_3d
 
 class Laser:
     """
@@ -20,7 +21,7 @@ class Laser:
             include/picongpu/param/fieldBackground.param
     """
     def __init__( self, a0, ctau, waist, cdelay, iy_antenna=0,
-                  y_foc=0.0, profile='Gaussian', pol='x', CEP = 0.0,
+                  y_foc=0.0, profile='Gaussian', pol='x', CEP=0.0,
                   wavelength=0.8e-6, method='native', LMNum=0, LM=[1.,],
                   dim='3d', center_ij=(0,0) ):
 
@@ -32,8 +33,8 @@ class Laser:
             Laser normalized amplitude
 
         ctau : float (in meters)
-            Laser duration as a longitudinal size (two RMS of the
-            power envelope)
+            Laser duration as two RMS of the intensity profile
+            ctau * 1.17741 = FWHM of the intensity profile
 
         waist : float (in meters)
             Laser waist (two RMS of the intensity profile)
@@ -91,7 +92,7 @@ class Laser:
         params['CEP'] = CEP
 
         if method=='native':
-            params['tau'] = ctau / c / 2.35482
+            params['tau'] = ctau / c / 2
             params['injection_duration'] = 2 * cdelay / c / params['tau']
             params['pol'] = { 'x':'LINEAR_X', 'z':'LINEAR_Z',
                               'circ':'CIRCULAR' }[pol]
@@ -104,7 +105,13 @@ class Laser:
             params['pol'] = { 'x':'1', 'z':'2', 'circ':'3' }[pol]
             params['ix_cntr'] = center_ij[0]
             params['iz_cntr'] = center_ij[1]
-
+            if dim=='3d':
+               params['r2'] = Template(r2_3d).render(**params)
+               params['laser_profile'] = Template(laser_profile_3d).render(**params)
+            elif dim=='2d':
+               params['r2'] = Template(r2_2d).render(**params)
+               params['laser_profile'] = Template(laser_profile_2d).render(**params)
+            
         # Converting float and integer arguments to strings
         for arg in params.keys():
             if type(params[arg]) == float:

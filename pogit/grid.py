@@ -24,7 +24,7 @@ class GridSolver:
                   Nsteps, decomposition, dim='3d',
                   dt_fromCFL=0.995, dt=None, absorber=None,
                   solver_scheme='Yee', J_smoothing=None,
-                  movingWindow=False, movePoint=1.0
+                  movingWindow=False, movePoint=1.0, wallTime=120.
                 ):
         """
         Initialize the GridSolver object
@@ -77,6 +77,10 @@ class GridSolver:
               A virtual photon starts at t=0 and y=0. When it reaches
               movePoint % of the global simulation box the co-moving
               window starts to move with the speed of light.
+
+        wallTime : float
+            Wall time for the simulation in minutes passed to the submission
+            system in `run.cfg`
         """
         params = {}
 
@@ -95,7 +99,6 @@ class GridSolver:
             params['SuperCellSize'] = ', '\
                 .join([str(s) for s in SuperCell[:2]])
 
-
         Nx = np.ceil( 1.*Nx / decomposition[0] / SuperCell[0] ) * \
                               decomposition[0] * SuperCell[0]
         Nz = np.ceil( 1.*Nz / decomposition[2] / SuperCell[2] ) * \
@@ -103,10 +106,10 @@ class GridSolver:
         dx = xmax/Nx
         dz = zmax/Nz
 
-
         if movingWindow:
             params['movingWindow'] =  "-m"
             # Account for extra GPU(s) at the front
+            
             nGPUy = decomposition[1]
             if nGPUy <= 1:
                 raise ValueError("Add extra GPU along Y for movingWindow")
@@ -172,6 +175,14 @@ class GridSolver:
             params['CurrentInterpolation'] = 'None'
         else:
             params['CurrentInterpolation'] = J_smoothing
+
+        wallH = int( wallTime//60 )
+        wallM = int( wallTime - 60*wallH )
+        wallS = int( 60 * (wallTime - 60*wallH - wallM) )
+
+        params['wallTimeH'] = str(wallH).zfill(2)
+        params['wallTimeM'] = str(wallM).zfill(2)
+        params['wallTimeS'] = str(wallS).zfill(2)
 
         # Converting float and integer arguments to strings
         for arg in params.keys():

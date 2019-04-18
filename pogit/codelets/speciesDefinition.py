@@ -101,6 +101,25 @@ using PIC_${name} = Particles<
     DefaultParticleAttributes
 >;"""
 
+speciesDefinition['probe'] = \
+"""
+using ParticleFlags${name} = MakeSeq_t<
+    particlePusher< UsedParticlePusher${name} >,
+    shape< UsedParticleShape${name} >,
+    interpolation< UsedField2Particle${name} >
+>;
+
+/* define species Probe */
+using PIC_${name} = Particles<
+    PMACC_CSTRING( "${name}" ),
+    ParticleFlags${name},
+    MakeSeq_t<
+        position< position_pic >,
+        probeB,
+        probeE
+    >
+>;"""
+
 speciesDefinition['photon'] = \
 """
 /*--------------------------- photons -------------------------------------------*/
