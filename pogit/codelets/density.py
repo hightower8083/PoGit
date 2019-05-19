@@ -14,6 +14,7 @@ densityProfile['Gaussian'] = \
 
     using densityProfile${name}${profile_index} = GaussianImpl< DensityParameter${name}${profile_index} >;"""
 
+
 densityProfile['FormulaXY'] = \
 """
     struct DensityParameter${name}${profile_index}
@@ -47,7 +48,7 @@ densityProfile['FormulaXYZ'] = \
         {
             const float_64 x( position_SI.x() );
             const float_64 y( position_SI.y() );
-            const float_64 z( position_SI.z() );
+            // const float_64 z( position_SI.z() ); //  UNCOMMENT FOR 3D IF NEEDED
             float_64 dens = 0.0;
 ${Formula}
             dens *= float_64( dens >= 0.0 );

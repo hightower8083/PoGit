@@ -38,3 +38,4 @@ r2_2d = "const float_64 distance2_SI = float_64(cellIdx.x()-${ix_cntr}) * SI::CE
 r2_3d = "const float_64 distance2_SI = float_64(cellIdx.x()-${ix_cntr}) * SI::CELL_WIDTH_SI * float_64(cellIdx.x()-${ix_cntr}) * SI::CELL_WIDTH_SI +  float_64(cellIdx.z()-${iz_cntr} ) * SI::CELL_DEPTH_SI * float_64(cellIdx.z()-${iz_cntr} ) * SI::CELL_DEPTH_SI;"
 laser_profile_2d = "const float_64 laser_profile = math::exp( -r2_norm - temporal_norm*temporal_norm ) * math::sqrt(${w0}) / math::sqrt(math::sqrt(w2_SI));"
 laser_profile_3d = "const float_64 laser_profile = math::exp( -r2_norm - temporal_norm*temporal_norm ) * ${w0} / math::sqrt(w2_SI);"
+
