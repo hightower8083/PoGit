@@ -25,16 +25,17 @@ LaserAntenna["Gaussian"] = \
                 ${laser_profile}
                 
                 if (pol<3) {
-                    current_comp_${pol} += laser_profile * ${a0} * A0_to_J * math::sin(laser_phase + ${CEP});
+                    current_comp_${pol} += laser_profile * ${a0} * A0_to_J * math::cos(laser_phase + ${CEP});
                 }
 
                 if (pol==3) {
-                    current_comp_1 += laser_profile * ${a0} * A0_to_J * math::sin(laser_phase + ${CEP});
-                    current_comp_2 += laser_profile * ${a0} * A0_to_J * math::cos(laser_phase + ${CEP});
+                    current_comp_1 += laser_profile * ${a0} * A0_to_J * math::cos(laser_phase + ${CEP});
+                    current_comp_2 += laser_profile * ${a0} * A0_to_J * math::sin(laser_phase + ${CEP});
                 }
             }"""
 
 r2_2d = "const float_64 distance2_SI = float_64(cellIdx.x()-${ix_cntr}) * SI::CELL_WIDTH_SI * float_64(cellIdx.x()-${ix_cntr}) * SI::CELL_WIDTH_SI ;"
 r2_3d = "const float_64 distance2_SI = float_64(cellIdx.x()-${ix_cntr}) * SI::CELL_WIDTH_SI * float_64(cellIdx.x()-${ix_cntr}) * SI::CELL_WIDTH_SI +  float_64(cellIdx.z()-${iz_cntr} ) * SI::CELL_DEPTH_SI * float_64(cellIdx.z()-${iz_cntr} ) * SI::CELL_DEPTH_SI;"
-laser_profile_2d = "const float_64 laser_profile = math::exp( -r2_norm - temporal_norm*temporal_norm ) * algorithms::math::sqrt(${w0}) / algorithms::math::sqrt(algorithms::math::sqrt(w2_SI));"
-laser_profile_3d = "const float_64 laser_profile = math::exp( -r2_norm - temporal_norm*temporal_norm ) * ${w0} / algorithms::math::sqrt(w2_SI);"
+laser_profile_2d = "const float_64 laser_profile = math::exp( -r2_norm - temporal_norm*temporal_norm ) * math::sqrt(${w0}) / math::sqrt(math::sqrt(w2_SI));"
+laser_profile_3d = "const float_64 laser_profile = math::exp( -r2_norm - temporal_norm*temporal_norm ) * ${w0} / math::sqrt(w2_SI);"
+

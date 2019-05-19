@@ -14,7 +14,29 @@ densityProfile['Gaussian'] = \
 
     using densityProfile${name}${profile_index} = GaussianImpl< DensityParameter${name}${profile_index} >;"""
 
-densityProfile['Formula'] = \
+
+densityProfile['FormulaXY'] = \
+"""
+    struct DensityParameter${name}${profile_index}
+    {
+        HDINLINE float_X
+        operator()(
+            const floatD_64& position_SI,
+            const float3_64& cellSize_SI
+        )
+        {
+            const float_64 x( position_SI.x() );
+            const float_64 y( position_SI.y() );
+            float_64 dens = 0.0;
+${Formula}
+            dens *= float_64( dens >= 0.0 );
+            return dens;
+        }
+    };
+
+    using densityProfile${name}${profile_index} = FreeFormulaImpl< DensityParameter${name}${profile_index} >;"""
+    
+densityProfile['FormulaXYZ'] = \
 """
     struct DensityParameter${name}${profile_index}
     {
