@@ -132,4 +132,4 @@ def WriteAndSubmit( objs, sim_name='run', output_path="$PIC_SCRATCH",
 
         print('*** RUN THE SIMULATION')
         os.system( f'tbg -s {s} -c etc/picongpu/run.cfg -t {t} '+\
-                   f'{output_path}/{sim_name}' )
+                   f'{output_path}/{sim_name} > log &' )
