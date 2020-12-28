@@ -24,3 +24,8 @@ plugins["hdf5"] = \
 """
 TBG_${name}_${period}="--hdf5.period ${period} --hdf5.file ${name} --hdf5.source '${source}'" """
 
+
+plugins["openPMD"] = \
+"""
+TBG_${name}_${period}="--openPMD.period ${period} --openPMD.file ${name} --openPMD.source '${source}' --openPMD.ext h5" """
+
