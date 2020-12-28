@@ -14,7 +14,7 @@ class Plugin:
             etc/picongpu/run.cfg
     """
 
-    def __init__( self, type="hdf5", period=0,
+    def __init__( self, type="openPMD", period=0,
                   source="fields_all, species_all",
                   name='raw', **kw_args ):
 
