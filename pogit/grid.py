@@ -107,7 +107,7 @@ class GridSolver:
         dz = zmax/Nz
 
         if movingWindow:
-            params['movingWindow'] =  "-m"
+            params['movingWindow'] =  f"-m --windowMovePoint {movePoint}"
             # Account for extra GPU(s) at the front
             
             nGPUy = decomposition[1]
